@@ -2,10 +2,11 @@
 
 ### Contribution -
 1. Clone the project into your local system.
-2. Make a separate branch for your assigned issue
-3. Send a PR after the work is done.
-4. For testing APIs, use postman or thunderclient(a extension in vscode).
-5. The PR after approval will be merged.
+2. Go through the codebase.
+3. Make a separate branch for your assigned issue
+4. Send a PR after the work is done.
+5. For testing APIs, use postman or thunderclient(a extension in vscode).
+6. The PR after approval will be merged.
 
 ### Resources -
 1. Quickstart for building Django Rest APIs [DRF-quickstart-documentation](https://www.django-rest-framework.org/tutorial/quickstart/)
