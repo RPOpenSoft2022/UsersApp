@@ -1,5 +1,7 @@
 ## User Microservice
 
+### Target APIs are listed [here](https://docs.google.com/spreadsheets/d/1a06rlvKYcf2rQdlKNHMDYoQIlcTim5WWrCwaN59l64U/edit?usp=sharing)
+
 ### Contribution -
 1. Clone the project into your local system.
 2. Go through the codebase.
