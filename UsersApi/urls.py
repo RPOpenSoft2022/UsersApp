@@ -7,4 +7,5 @@ urlpatterns = [
 	path('createuser/', views.createUser, name="create-user"),
 	path('deleteuser/<int:pk>/', views.deleteUser, name="delete-user"),
 	path('getspecificuser/<int:pk>/', views.getSpecificUser, name="get-specific-user"),
+	path('login/',views.login, name="login"),
 ]
