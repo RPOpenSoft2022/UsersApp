@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .models import User
+from .models import MyUser
 
 # add serializers
 # change as per use
-class UserSerializer(serializers.ModelSerializer):
+class MyUserSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = User
-		fields ='__all__'
+		model = MyUser
+		# fields ='__all__'
+		exclude = ('last_login','password', 'is_admin', 'is_staff', 'is_superuser', 'is_active')
