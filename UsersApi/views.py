@@ -54,7 +54,7 @@ def deleteUser(request, pk):
 @api_view(['GET'])
 def getSpecificUser(request, pk):
 	try:
-		user = MyUser.objects.get(id=pk)
+		user = MyUser.objects.get(phone=pk)
 	except Exception as e:
 		return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

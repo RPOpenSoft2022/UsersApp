@@ -54,15 +54,16 @@ class MyUser(AbstractBaseUser):
 	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
 	middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)
 	last_name = models.CharField(verbose_name="Last Name", max_length=200, null=True, blank=True)
-	phone = models.BigIntegerField(verbose_name="Contact Number", null=True, blank=True, unique=True)
+	phone = models.BigIntegerField(verbose_name="Contact Number", unique=True, primary_key=True, null=False)
 	address = models.TextField(null=True, blank=True)
 	age = models.IntegerField(verbose_name="Age", null=True, blank=True)
 	gender = models.CharField(verbose_name="Gender", max_length=200, null=True, blank=True)
 	user_category = models.CharField(verbose_name="User Category", choices=USER_CATEGORY, default='Customer', max_length=200)
-	current_location = models.DecimalField(verbose_name="Current Location",max_digits=22,
+	current_lat = models.DecimalField(verbose_name="Current Latitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
-	last_updated_location = models.DecimalField(verbose_name="Last Updated Location",max_digits=22,
+	current_long = models.DecimalField(verbose_name="Current Longitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
+	last_updated_location_time = models.DateTimeField(verbose_name="Last updated location time", null=True, blank=True)
 
 	is_admin = models.BooleanField(default=False)
 	is_active = models.BooleanField(default=True)
