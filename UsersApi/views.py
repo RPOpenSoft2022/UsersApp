@@ -3,13 +3,17 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .tokens import get_tokens_for_user
+from .models import OTPModel
 from .serializers import MyUserSerializer
 from rest_framework.views import APIView
 from .models import MyUser
 from datetime import date, datetime
-import jwt
+# import jwt
 from django.contrib.auth.models import auth
 from rest_framework.pagination import PageNumberPagination
+from datetime import timedelta
+from django.utils import timezone
 
 # This is a sample working of API
 # create like this for other APIs
@@ -20,6 +24,18 @@ from rest_framework.pagination import PageNumberPagination
 def testApi(request):
     return Response("Api Working!!")
 
+
+@api_view(['GET'])
+def VerifyOTP(request):
+	phone = request.data["phone"]
+	otp = request.data["otp"]
+	OTPSent = OTPModel.objects.get(phone_number=phone)
+	user = MyUser.objects.get(phone=phone)
+
+	if otp == OTPSent.otp and (OTPSent.valid_until > timezone.now()):
+		return Response(data=get_tokens_for_user(user))
+	else:
+		return Response('Unauthorized', status=401)
 
 @api_view(['GET'])
 def getUsers(request):
@@ -75,26 +91,22 @@ def login(request):
     phone = request.data.get('phone')
     user = MyUser.objects.get(phone=phone)
     if user is not None: 
-        user = auth.authenticate(phone=request.data['password'], password= request.data['phone'])
-        if user is not None:
-            payload = {
-                'id': user.phone,
-                'exp': datetime.utcnow() + datetime.timedelta(minutes=5),
-                'iat': datetime.utcnow()
-            }
-            token = jwt.encode(payload, 'secret', algorithm='HS256')
-
+        if user['password'] == request.data.get('password'):
+            # payload = {
+            #     'id': user.phone,
+            #     'exp': datetime.utcnow() + datetime.timedelta(minutes=5),
+            #     'iat': datetime.utcnow()
+            # }
+            # token = jwt.encode(payload, 'secret', algorithm='HS256')
+            tokens = get_tokens_for_user(user)
             response = Response()
-            serializer = MyUserSerializer(user)
-            response.data = {
-                'token': token,
-                'user': serializer.data,
+            response.data = tokens, {
                 'message': 'Logged in succesfully',
             }
             return response
         else:
-            content = {'message': 'incorrect password2'}
+            content = {'message': 'incorrect password'}
     else:
-        content = {'message': 'incorrect password1'}
+        content = {'message': 'incorrect phone number'}
 
     return Response(content, status=status.HTTP_400_BAD_REQUEST)

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 class MyUserManager(BaseUserManager):
@@ -77,10 +79,20 @@ class MyUser(AbstractBaseUser):
 	objects = MyUserManager()
 
 	def __str__(self):
-		return self.email
-
+		return self.name
 	def has_perm(self, perm, obj=None):
 		return True
-	
 	def has_module_perms(self, app_label):
 		return True
+
+class OTPModel(models.Model):
+	phone_number = models.BigIntegerField()
+	otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
+	#time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
+	valid_until = models.DateTimeField(
+        default=timezone.now,
+        help_text="The timestamp of the moment of expiry of the saved token."
+    )
+
+	
+	
