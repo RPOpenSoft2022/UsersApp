@@ -33,7 +33,7 @@ def getUsers(request):
 @api_view(['POST'])
 def createUser(request):
     token = request.data.get('token')
-    
+
     serializer = MyUserSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -76,7 +76,7 @@ def login(request):
         if user.password == request.data.get('password'):
             payload = {
                 'phone': user.phone,
-                'exp': datetime.utcnow() + datetime(minutes=5),
+                'exp': datetime.utcnow() + timedelta(seconds=5*60),
                 'iat': datetime.utcnow()
             }
             token = jwt.encode(payload, 'secret', algorithm='HS256')
