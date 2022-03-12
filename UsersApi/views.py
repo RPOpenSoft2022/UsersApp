@@ -1,4 +1,5 @@
 from os import stat
+from pstats import Stats
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework import status
@@ -15,10 +16,16 @@ from django.contrib.auth.models import auth
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
+from .utilities import validate_token
 
 
 @api_view(['GET'])
 def getUsers(request):
+    token = request.data.get('token')
+    enc_info = validate_token(token)
+    if not enc_info:
+        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     paginator = PageNumberPagination()
     if 'page_size' in request.GET:
         paginator.page_size = int(request.GET['page_size'])
@@ -45,7 +52,12 @@ def createUser(request):
 
 
 @api_view(['DELETE'])
-def deleteUser(request, pk):
+def deleteUser(request, pk):    
+    token = request.data.get('token')
+    enc_info = validate_token(token)
+    if not enc_info:
+        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     try:
         user = MyUser.objects.get(id=pk)
     except Exception as e:
@@ -58,6 +70,10 @@ def deleteUser(request, pk):
 
 @api_view(['GET'])
 def getSpecificUser(request, pk):
+    token = request.data.get('token')
+    enc_info = validate_token(token)
+    if not enc_info:
+        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         user = MyUser.objects.get(id=pk)
     except Exception as e:
@@ -71,9 +87,10 @@ def getSpecificUser(request, pk):
 @api_view(['POST'])
 def login(request):
     phone = request.data.get('phone')
-    user = MyUser.objects.get(phone=phone)
-    if user is not None: 
-        if user.password == request.data.get('password'):
+    try:
+        user = MyUser.objects.get(phone=phone)
+        password = request.data.get('password')
+        if user.check_password(password):
             payload = {
                 'phone': user.phone,
                 'exp': datetime.utcnow() + timedelta(seconds=5*60),
@@ -88,7 +105,7 @@ def login(request):
             return response
         else:
             content = {'message': 'incorrect password'}
-    else:
+    except:
         content = {'message': 'incorrect phone number'}
 
     return Response(content, status=status.HTTP_400_BAD_REQUEST)
