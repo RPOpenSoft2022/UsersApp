@@ -1,3 +1,4 @@
+from os import stat
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework import status
@@ -7,35 +8,14 @@ from .tokens import get_tokens_for_user
 from .models import OTPModel
 from .serializers import MyUserSerializer
 from rest_framework.views import APIView
-from .models import MyUser
+from .models import MyUser, MyUserManager
 from datetime import date, datetime
-# import jwt
+import jwt
 from django.contrib.auth.models import auth
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
 
-# This is a sample working of API
-# create like this for other APIs
-# GET, POST, PUT OR DELETE
-
-
-@api_view(['GET'])
-def testApi(request):
-    return Response("Api Working!!")
-
-
-@api_view(['GET'])
-def VerifyOTP(request):
-	phone = request.data["phone"]
-	otp = request.data["otp"]
-	OTPSent = OTPModel.objects.get(phone_number=phone)
-	user = MyUser.objects.get(phone=phone)
-
-	if otp == OTPSent.otp and (OTPSent.valid_until > timezone.now()):
-		return Response(data=get_tokens_for_user(user))
-	else:
-		return Response('Unauthorized', status=401)
 
 @api_view(['GET'])
 def getUsers(request):
@@ -52,14 +32,16 @@ def getUsers(request):
 
 @api_view(['POST'])
 def createUser(request):
+    token = request.data.get('token')
+    
     serializer = MyUserSerializer(data=request.data)
 
     if serializer.is_valid():
         serializer.save()
     else:
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-    return Response(serializer.data)
+    
+    return Response(data={"message": "user created, now you can login."})
 
 
 @api_view(['DELETE'])
@@ -91,16 +73,16 @@ def login(request):
     phone = request.data.get('phone')
     user = MyUser.objects.get(phone=phone)
     if user is not None: 
-        if user['password'] == request.data.get('password'):
-            # payload = {
-            #     'id': user.phone,
-            #     'exp': datetime.utcnow() + datetime.timedelta(minutes=5),
-            #     'iat': datetime.utcnow()
-            # }
-            # token = jwt.encode(payload, 'secret', algorithm='HS256')
-            tokens = get_tokens_for_user(user)
+        if user.password == request.data.get('password'):
+            payload = {
+                'phone': user.phone,
+                'exp': datetime.utcnow() + datetime(minutes=5),
+                'iat': datetime.utcnow()
+            }
+            token = jwt.encode(payload, 'secret', algorithm='HS256')
             response = Response()
-            response.data = tokens, {
+            response.data = {
+                'token': token,
                 'message': 'Logged in succesfully',
             }
             return response
@@ -110,3 +92,49 @@ def login(request):
         content = {'message': 'incorrect phone number'}
 
     return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def sendOTP(request):
+    phone = request.data['phone']
+
+    try:
+        otp_row = OTPModel.objects.get(phone=phone)
+    except:
+        otp_row = None
+
+    if otp_row:
+        if otp_row.valid_until > timezone.now():
+            return Response(data={"message": "OTP already sent"})
+        otp_row.delete()
+
+    newOTP = OTPModel(phone=phone, otp=999999)
+    newOTP.save()
+    return Response(data={"message": "OTP send"})
+
+
+@api_view(['POST'])
+def verifyOTP(request):
+    phone = request.data.get('phone')
+    otp = request.data.get('otp')
+
+    if phone and otp:
+        try:
+            otp_row = OTPModel.objects.get(phone=phone)
+        except:
+            otp_row = None
+
+        if otp_row:
+            if otp_row.otp == otp and otp_row.valid_until > timezone.now(): 
+                otp_row.delete()  
+                payload = {
+                    'phone': phone,
+                    'exp': datetime.utcnow() + timedelta(seconds=5*60),
+                    'iat': datetime.utcnow()
+                }
+                token = jwt.encode(payload, 'secret', algorithm='HS256')
+
+                return Response(data={"token": token})
+
+            return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+    return Response(status=status.HTTP_400_BAD_REQUEST)

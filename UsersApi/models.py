@@ -53,6 +53,7 @@ class MyUser(AbstractBaseUser):
 	)
 
 	email = models.EmailField(verbose_name="Email Address", max_length=200, unique=True)
+	name = models.CharField(verbose_name="Name", max_length=200, blank=True)
 	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
 	middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)
 	last_name = models.CharField(verbose_name="Last Name", max_length=200, null=True, blank=True)
