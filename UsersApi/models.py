@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 class MyUserManager(BaseUserManager):
@@ -51,82 +53,50 @@ class MyUser(AbstractBaseUser):
 	)
 
 	email = models.EmailField(verbose_name="Email Address", max_length=200, unique=True)
+	name = models.CharField(verbose_name="Name", max_length=200, blank=True)
 	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
 	middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)
 	last_name = models.CharField(verbose_name="Last Name", max_length=200, null=True, blank=True)
-	phone = models.BigIntegerField(verbose_name="Contact Number", null=True, blank=True, unique=True)
+	phone = models.BigIntegerField(verbose_name="Contact Number", unique=True, primary_key=True, null=False)
 	address = models.TextField(null=True, blank=True)
 	age = models.IntegerField(verbose_name="Age", null=True, blank=True)
 	gender = models.CharField(verbose_name="Gender", max_length=200, null=True, blank=True)
 	user_category = models.CharField(verbose_name="User Category", choices=USER_CATEGORY, default='Customer', max_length=200)
-	current_location = models.DecimalField(verbose_name="Current Location",max_digits=22,
+
+	# delivery partner specific fields
+	current_lat = models.DecimalField(verbose_name="Current Latitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
-	last_updated_location = models.DecimalField(verbose_name="Last Updated Location",max_digits=22,
+	current_long = models.DecimalField(verbose_name="Current Longitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
+	last_updated_location_time = models.DateTimeField(verbose_name="Last updated location time", null=True, blank=True)
+	is_free = models.BooleanField(default=True)
 
 	is_admin = models.BooleanField(default=False)
 	is_active = models.BooleanField(default=True)
 	is_staff = models.BooleanField(default=False)
 	is_superuser = models.BooleanField(default=False)
 
-	USERNAME_FIELD = "email"
+	USERNAME_FIELD = "phone"
 
 	REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'phone']
 
 	objects = MyUserManager()
 
 	def __str__(self):
-		return self.email
-
+		return self.name
 	def has_perm(self, perm, obj=None):
 		return True
-	
 	def has_module_perms(self, app_label):
 		return True
 
-# Download the helper library from https://www.twilio.com/docs/python/install
-import os
-from twilio.rest import Client
-import random
+class OTPModel(models.Model):
+	phone = models.BigIntegerField()
+	otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
+	#time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
+	valid_until = models.DateTimeField(
+        default=timezone.now() + timedelta(seconds=300),
+        help_text="The timestamp of the moment of expiry of the saved token."
+    )
 
-# Find your Account SID and Auth Token at twilio.com/console
-# and set the environment variables. See http://twil.io/secure
-#account_sid = os.environ['ACf55b59ed14d54f24075833dedd87fcc9']
-#auth_token = os.environ['7bb0fcad734cdf5d2fe253f303d4a3b9']
-#client = Client(account_sid, auth_token)
-#
-#message = client.messages \
-#                .create(
-#                     body="send otp",
-#                     from_='+19712487862',
-#                     to='+917070666966'
-#                 )
-#
-#print(message.sid)
-#
-#otp=random.randint(1000,9999)
-#print(otp)
-#
-#account_sid = 'ACf55b59ed14d54f24075833dedd87fcc9'
-#auth_token = '7bb0fcad734cdf5d2fe253f303d4a3b9'
-#client = Client(account_sid,auth_token)
-#
-#message = client.messages.create(
-#	body = 'Your OTP is '+str(otp),
-#	from_='+19712487862',
-#     to='+917070666966'
-#)
-#print (message.sid)
-class OTP(models.Model):
-	def save(self,*args,**kwargs):
-		account_sid = 'ACf55b59ed14d54f24075833dedd87fcc9'
-		auth_token = '7bb0fcad734cdf5d2fe253f303d4a3b9'
-		client = Client(account_sid,auth_token)
-		otp=random.randint(1000,9999)
-		print(otp)
-		message = client.messages.create(
- 			body = 'Your OTP is '+str(otp),
-			from_='+19712487862',
-     		to='+917070666966')
-		print(message.id)    
-		return super().save(*args, **kwargs)
+	
+	

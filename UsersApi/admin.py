@@ -13,7 +13,7 @@ class MyUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide'),
-            'fields': ('email', 'phone', 'first_name', 'middle_name', 'last_name', 'password1', 'password2'),
+            'fields': ('email', 'phone', 'first_name', 'middle_name', 'last_name', 'password'),
 
         }),
     )
@@ -21,4 +21,4 @@ class MyUserAdmin(BaseUserAdmin):
     ordering = ('email',)
 
 admin.site.register(MyUser, MyUserAdmin)
-admin.site.register(OTP)
+admin.site.register(OTPModel)
