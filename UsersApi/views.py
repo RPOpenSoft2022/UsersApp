@@ -3,16 +3,14 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-<<<<<<< HEAD
-from .serializers import UserSerializer
-
-from .models import User, OTPModel
-=======
+from .tokens import get_tokens_for_user
+from .models import OTPModel
 from .serializers import MyUserSerializer
 from rest_framework.views import APIView
 from .models import MyUser
 from rest_framework.pagination import PageNumberPagination
->>>>>>> 43e03ce125e840d7546c6874f8615b5b6954cbee
+from datetime import timedelta
+from django.utils import timezone
 
 # This is a sample working of API
 # create like this for other APIs
@@ -21,16 +19,18 @@ from rest_framework.pagination import PageNumberPagination
 def testApi(request):
 	return Response("Api Working!!")
 
-<<<<<<< HEAD
-@api_view(['POST'])
+@api_view(['GET'])
 def VerifyOTP(request):
 	phone = request.data["phone"]
 	otp = request.data["otp"]
 	OTPSent = OTPModel.objects.get(phone_number=phone)
+	user = MyUser.objects.get(phone="4734673647")
 
-	if otp == OTPSent.otp:
-		return Response
-=======
+	if otp == OTPSent.otp and (OTPSent.valid_until + timedelta(seconds=300))<timezone.now:
+		return Response(data=(user,get_tokens_for_user(user)))
+	else:
+		return Response('Unauthorized', status=401)
+
 @api_view(['GET'])
 def getUsers(request):
 	paginator = PageNumberPagination()
@@ -77,4 +77,3 @@ def getSpecificUser(request, pk):
 	serializer = MyUserSerializer(user)
 
 	return Response(serializer.data)
->>>>>>> 43e03ce125e840d7546c6874f8615b5b6954cbee

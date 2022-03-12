@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import (
+    TokenObtainSlidingView,
+    TokenRefreshSlidingView,)
 
 urlpatterns = [
 	path('test/', views.testApi, name="test-api"),
@@ -7,4 +10,5 @@ urlpatterns = [
 	path('createuser/', views.createUser, name="create-user"),
 	path('deleteuser/<int:pk>/', views.deleteUser, name="delete-user"),
 	path('getspecificuser/<int:pk>/', views.getSpecificUser, name="get-specific-user"),
+	path('VerifyOTP/', views.VerifyOTP, name='token_obtain'),
 ]
