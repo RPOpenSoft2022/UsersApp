@@ -86,11 +86,11 @@ class MyUser(AbstractBaseUser):
 		return True
 
 class OTPModel(models.Model):
-	phone_number = models.BigIntegerField()
+	phone = models.BigIntegerField()
 	otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
 	#time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
 	valid_until = models.DateTimeField(
-        default=timezone.now,
+        default=timezone.now() + timedelta(seconds=300),
         help_text="The timestamp of the moment of expiry of the saved token."
     )
 
