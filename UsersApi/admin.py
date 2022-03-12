@@ -21,3 +21,4 @@ class MyUserAdmin(BaseUserAdmin):
     ordering = ('email',)
 
 admin.site.register(MyUser, MyUserAdmin)
+admin.site.register(OTP)

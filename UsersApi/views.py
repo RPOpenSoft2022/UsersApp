@@ -61,3 +61,9 @@ def getSpecificUser(request, pk):
 	serializer = MyUserSerializer(user)
 
 	return Response(serializer.data)
+
+#@api_view(['POST'])
+#def forgetpassword(request):  
+#    try:
+#		phone_number = request.data.get("phone")
+##+19712487862

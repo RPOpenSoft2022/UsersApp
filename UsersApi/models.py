@@ -83,3 +83,50 @@ class MyUser(AbstractBaseUser):
 	
 	def has_module_perms(self, app_label):
 		return True
+
+# Download the helper library from https://www.twilio.com/docs/python/install
+import os
+from twilio.rest import Client
+import random
+
+# Find your Account SID and Auth Token at twilio.com/console
+# and set the environment variables. See http://twil.io/secure
+#account_sid = os.environ['ACf55b59ed14d54f24075833dedd87fcc9']
+#auth_token = os.environ['7bb0fcad734cdf5d2fe253f303d4a3b9']
+#client = Client(account_sid, auth_token)
+#
+#message = client.messages \
+#                .create(
+#                     body="send otp",
+#                     from_='+19712487862',
+#                     to='+917070666966'
+#                 )
+#
+#print(message.sid)
+#
+#otp=random.randint(1000,9999)
+#print(otp)
+#
+#account_sid = 'ACf55b59ed14d54f24075833dedd87fcc9'
+#auth_token = '7bb0fcad734cdf5d2fe253f303d4a3b9'
+#client = Client(account_sid,auth_token)
+#
+#message = client.messages.create(
+#	body = 'Your OTP is '+str(otp),
+#	from_='+19712487862',
+#     to='+917070666966'
+#)
+#print (message.sid)
+class OTP(models.Model):
+	def save(self,*args,**kwargs):
+		account_sid = 'ACf55b59ed14d54f24075833dedd87fcc9'
+		auth_token = '7bb0fcad734cdf5d2fe253f303d4a3b9'
+		client = Client(account_sid,auth_token)
+		otp=random.randint(1000,9999)
+		print(otp)
+		message = client.messages.create(
+ 			body = 'Your OTP is '+str(otp),
+			from_='+19712487862',
+     		to='+917070666966')
+		print(message.id)    
+		return super().save(*args, **kwargs)
