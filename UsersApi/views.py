@@ -45,12 +45,30 @@ def createUser(request):
     for field in req_fields:
         all_prs = all_prs and (field in dict_info)
     if all_prs:
-        user = MyUser(**dict_info)
-        user.set_password(request.data.get('password'))
-        user.save()
-        return Response(data={"message": "user created, now you can login."})
+        try:
+            user = MyUser.objects.get(phone=request.data.get('phone'))
+        except:
+            user = None
+        if user:
+            return Response({"message": "A user with this phone already exists"},status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = MyUser(**dict_info)
+            user.set_password(request.data.get('password'))
+            payload = {
+                    'phone': request.data.get('phone')
+                }
+            token = generate_token(payload)
+            response = Response()
+            response.data = {
+                'token': token,
+                'message': 'User created',
+            }
+            return response
+        except:
+            return Response(data={"message": "user not created"}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message": "required fields not present"},status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 def deleteUser(request, pk):    
