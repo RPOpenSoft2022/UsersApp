@@ -31,5 +31,5 @@ def sendMessage(phone, message):
     message = client.messages.create(
         body = message,
         from_=settings.SENDER_PHONE,
-        to=phone)
+        to='+91'+phone)
     

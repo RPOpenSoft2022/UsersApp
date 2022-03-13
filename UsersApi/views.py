@@ -168,15 +168,16 @@ def sendOTP(request):
 def verifyOTP(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-
+    print(phone, otp)
     if phone and otp:
+        phone=int(phone)
+        otp = str(otp)
         try:
             otp_row = OTPModel.objects.get(phone=phone)
         except:
             otp_row = None
-
         if otp_row:
-            if otp_row.otp == otp and otp_row.valid_until > timezone.now(): 
+            if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()): 
                 otp_row.delete()  
                 payload = {
                     'phone': phone
