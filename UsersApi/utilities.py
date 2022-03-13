@@ -2,6 +2,7 @@ import jwt, datetime
 from django.utils import timezone
 from django.conf import settings
 from .models import MyUser
+from twilio.rest import Client
 
 def validate_token(token):
     try:
@@ -22,3 +23,13 @@ def staff_perm(token):
         return user.user_category == 'Staff'
 
     return False
+
+def sendMessage(phone, message):
+    account_sid = settings.ACCOUNT_SID
+    auth_token = settings.AUTH_TOKEN
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+        body = message,
+        from_=settings.SENDER_PHONE,
+        to=phone)
+    

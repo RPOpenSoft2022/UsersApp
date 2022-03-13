@@ -16,9 +16,7 @@ import jwt
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
-from .utilities import validate_token, generate_token, staff_perm
-from .utilities import validate_token
-from twilio.rest import Client
+from .utilities import validate_token, generate_token, staff_perm, sendMessage
 import random
 
 
@@ -140,14 +138,8 @@ def sendOTP(request):
         if otp_row.valid_until > timezone.now():
             return Response(data={"message": "OTP already sent"})
         otp_row.delete()
-    account_sid='ACf55b59ed14d54f24075833dedd87fcc9'
-    auth_token = '7bb0fcad734cdf5d2fe253f303d4a3b9'
-    client = Client(account_sid,auth_token)
-    otp=random.randint(100000,999999)
-    message = client.messages.create(
-        body = 'Your OTP is '+str(otp),
-        from_='+19712487862',
-        to=phone)
+    otp = random.randint(100000,999999)
+    sendMessage(phone, f'Your OTP is {otp}')
     newOTP = OTPModel(phone=phone, otp=otp)
     newOTP.save()
     return Response(data={"message": "OTP send"})
