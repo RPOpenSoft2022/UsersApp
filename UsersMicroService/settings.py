@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import environ
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -165,3 +169,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+OTP_EXPIRE_TIME = 300 # in seconds
+TOKEN_EXPIRE_TIME = 30*60 # in seconds
+SIGNATURE = 'Thlg-mlbaJeaHKTsc7LIRZNRsy1by-sjmzMdn7cc8FI'

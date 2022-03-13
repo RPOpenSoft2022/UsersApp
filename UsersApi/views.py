@@ -2,6 +2,7 @@ from os import stat
 from pstats import Stats
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -12,19 +13,16 @@ from rest_framework.views import APIView
 from .models import MyUser, MyUserManager
 from datetime import date, datetime
 import jwt
-from django.contrib.auth.models import auth
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
-from .utilities import validate_token
-
+from .utilities import validate_token, generate_token, staff_perm
 
 @api_view(['GET'])
 def getUsers(request):
     token = request.data.get('token')
-    enc_info = validate_token(token)
-    if not enc_info:
-        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not staff_perm(token):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     paginator = PageNumberPagination()
     if 'page_size' in request.GET:
@@ -39,27 +37,28 @@ def getUsers(request):
 
 @api_view(['POST'])
 def createUser(request):
-    token = request.data.get('token')
-
-    serializer = MyUserSerializer(data=request.data)
-
-    if serializer.is_valid():
-        serializer.save()
+    req_fields = ['email', 'phone', 'user_category', 'password']
+    dict_info = request.data
+    all_prs = True
+    for field in req_fields:
+        all_prs = all_prs and (field in dict_info)
+    if all_prs:
+        user = MyUser(**dict_info)
+        user.set_password(request.data.get('password'))
+        user.save()
+        return Response(data={"message": "user created, now you can login."})
     else:
-        return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    
-    return Response(data={"message": "user created, now you can login."})
-
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 def deleteUser(request, pk):    
     token = request.data.get('token')
     enc_info = validate_token(token)
-    if not enc_info:
-        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not enc_info or pk != enc_info.get('phone'):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     
     try:
-        user = MyUser.objects.get(id=pk)
+        user = MyUser.objects.get(phone=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -69,13 +68,13 @@ def deleteUser(request, pk):
 
 
 @api_view(['GET'])
-def getSpecificUser(request, pk):
-    token = request.data.get('token')
+def getUser(request, pk):
+    token = request.GET.get('token')
     enc_info = validate_token(token)
-    if not enc_info:
-        return Response(data={"message":"Invalid Token"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not enc_info or pk != enc_info.get('phone'):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = MyUser.objects.get(id=pk)
+        user = MyUser.objects.get(phone=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,30 +82,44 @@ def getSpecificUser(request, pk):
 
     return Response(serializer.data)
 
+@api_view(['PUT'])
+def updateUser(request, pk):
+    dict_info = request.data
+    token = dict_info.get('token')
+    enc_info = validate_token(token)
+    phone = enc_info.get('phone')
+    if not enc_info or pk != phone:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    dict_info.pop('token')
+    dict_info['phone'] = phone
+    user = MyUser(**dict_info)
+    if dict_info.get('password'):
+        user.set_password(dict_info.get('password'))
+    user.save()
+    return Response(data={"message": "user updated"})
 
 @api_view(['POST'])
 def login(request):
-    phone = request.data.get('phone')
+    phone = int(request.data.get('phone'))
     try:
         user = MyUser.objects.get(phone=phone)
         password = request.data.get('password')
-        if user.check_password(password):
+        
+        if user.password == password:
             payload = {
-                'phone': user.phone,
-                'exp': datetime.utcnow() + timedelta(seconds=5*60),
-                'iat': datetime.utcnow()
-            }
-            token = jwt.encode(payload, 'secret', algorithm='HS256')
+                    'phone': phone
+                }
+            token = generate_token(payload)
             response = Response()
             response.data = {
                 'token': token,
                 'message': 'Logged in succesfully',
             }
             return response
-        else:
+        else :
             content = {'message': 'incorrect password'}
-    except:
-        content = {'message': 'incorrect phone number'}
+    except Exception as e:
+        content = {'message': str(e)}
 
     return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
@@ -144,11 +157,9 @@ def verifyOTP(request):
             if otp_row.otp == otp and otp_row.valid_until > timezone.now(): 
                 otp_row.delete()  
                 payload = {
-                    'phone': phone,
-                    'exp': datetime.utcnow() + timedelta(seconds=5*60),
-                    'iat': datetime.utcnow()
+                    'phone': phone
                 }
-                token = jwt.encode(payload, 'secret', algorithm='HS256')
+                token = generate_token(payload)
 
                 return Response(data={"token": token})
 
