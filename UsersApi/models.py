@@ -53,27 +53,32 @@ class MyUser(AbstractBaseUser):
 	)
 
 	email = models.EmailField(verbose_name="Email Address", max_length=200, unique=True)
+	name = models.CharField(verbose_name="Name", max_length=200, blank=True)
 	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
 	middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)
 	last_name = models.CharField(verbose_name="Last Name", max_length=200, null=True, blank=True)
-	phone = models.BigIntegerField(verbose_name="Contact Number", null=True, blank=True, unique=True)
+	phone = models.BigIntegerField(verbose_name="Contact Number", unique=True, primary_key=True, null=False)
 	address = models.TextField(null=True, blank=True)
 	age = models.IntegerField(verbose_name="Age", null=True, blank=True)
 	gender = models.CharField(verbose_name="Gender", max_length=200, null=True, blank=True)
 	user_category = models.CharField(verbose_name="User Category", choices=USER_CATEGORY, default='Customer', max_length=200)
-	current_location = models.DecimalField(verbose_name="Current Location",max_digits=22,
+
+	# delivery partner specific fields
+	current_lat = models.DecimalField(verbose_name="Current Latitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
-	last_updated_location = models.DecimalField(verbose_name="Last Updated Location",max_digits=22,
+	current_long = models.DecimalField(verbose_name="Current Longitude",max_digits=22,
     decimal_places=16, null=True, blank=True)
+	last_updated_location_time = models.DateTimeField(verbose_name="Last updated location time", null=True, blank=True)
+	is_free = models.BooleanField(default=True)
 
 	is_admin = models.BooleanField(default=False)
 	is_active = models.BooleanField(default=True)
 	is_staff = models.BooleanField(default=False)
 	is_superuser = models.BooleanField(default=False)
 
-	USERNAME_FIELD = "email"
+	USERNAME_FIELD = "phone"
 
-	REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'phone']
+	REQUIRED_FIELDS = ['email', 'phone', 'user_category', 'password']
 
 	objects = MyUserManager()
 
@@ -85,11 +90,11 @@ class MyUser(AbstractBaseUser):
 		return True
 
 class OTPModel(models.Model):
-	phone_number = models.BigIntegerField()
+	phone = models.BigIntegerField()
 	otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
 	#time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
 	valid_until = models.DateTimeField(
-        default=timezone.now,
+        default=timezone.now() + timedelta(seconds=300),
         help_text="The timestamp of the moment of expiry of the saved token."
     )
 

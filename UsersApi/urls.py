@@ -5,10 +5,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshSlidingView,)
 
 urlpatterns = [
-	path('test/', views.testApi, name="test-api"),
 	path('getusers/', views.getUsers, name="get-users"),
-	path('createuser/', views.createUser, name="create-user"),
-	path('deleteuser/<int:pk>/', views.deleteUser, name="delete-user"),
-	path('getspecificuser/<int:pk>/', views.getSpecificUser, name="get-specific-user"),
-	path('VerifyOTP/', views.VerifyOTP, name='token_obtain'),
+	path('signup/', views.createUser, name="create-user"),
+	path('del-user/<int:pk>/', views.deleteUser, name="delete-user"),
+	path('get-user/<int:pk>/', views.getUser, name="get-user"),
+	path('update-user/<int:pk>/', views.updateUser, name="update-user"),
+	path('login/',views.login, name="login"),
+	path('verify-otp/', views.verifyOTP, name='verify-otp'),
+	path('send-otp/', views.sendOTP, name='send-otp'),
 ]

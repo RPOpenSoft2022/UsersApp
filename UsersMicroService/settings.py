@@ -165,3 +165,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+OTP_EXPIRE_TIME = 300 # in seconds
+TOKEN_EXPIRE_TIME = 30*60 # in seconds
+SIGNATURE = 'Thlg-mlbaJeaHKTsc7LIRZNRsy1by-sjmzMdn7cc8FI'
+
+# Twilio Configuration
+ACCOUNT_SID = 'AC83ab35d442326feb2880a232e9a5a81f'
+AUTH_TOKEN = 'c99acfa24d5ded3193dab83f6d2ea387'
+SENDER_PHONE = '+19124946204'
