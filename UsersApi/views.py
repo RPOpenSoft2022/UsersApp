@@ -24,7 +24,7 @@ def VerifyOTP(request):
 	phone = request.data["phone"]
 	otp = request.data["otp"]
 	OTPSent = OTPModel.objects.get(phone_number=phone)
-	user = MyUser.objects.get(phone="4734673647")
+	user = MyUser.objects.get(phone=phone)
 
 	if otp == OTPSent.otp and (OTPSent.valid_until + timedelta(seconds=300))<timezone.now:
 		return Response(data=(user,get_tokens_for_user(user)))
