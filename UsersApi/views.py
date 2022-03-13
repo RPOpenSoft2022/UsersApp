@@ -173,7 +173,8 @@ def verifyOTP(request):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def nearest_delivery(request):
     import geopy.distance
     lat = float(request.data.get('lat'))
