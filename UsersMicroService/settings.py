@@ -12,10 +12,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-import environ
-# Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -173,3 +169,8 @@ REST_FRAMEWORK = {
 OTP_EXPIRE_TIME = 300 # in seconds
 TOKEN_EXPIRE_TIME = 30*60 # in seconds
 SIGNATURE = 'Thlg-mlbaJeaHKTsc7LIRZNRsy1by-sjmzMdn7cc8FI'
+
+# Twilio Configuration
+ACCOUNT_SID = 'ACf55b59ed14d54f24075833dedd87fcc9'
+AUTH_TOKEN = '7bb0fcad734cdf5d2fe253f303d4a3b9'
+SENDER_PHONE = '+19712487862'
