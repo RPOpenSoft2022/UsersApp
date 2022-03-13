@@ -2,9 +2,10 @@ from os import stat
 from pstats import Stats
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.contrib.auth import authenticate
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from .tokens import get_tokens_for_user
 from .models import OTPModel
@@ -16,16 +17,19 @@ import jwt
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
-from .utilities import validate_token, generate_token, staff_perm, sendMessage
+from .utilities import sendMessage, get_distance
 import random
+from rest_framework_simplejwt.tokens import RefreshToken
 
+class BlacklistRefreshView(APIView):
+    def post(self, request):
+        token = RefreshToken(request.data.get('refresh'))
+        token.blacklist()
+        return Response("Logged out succesfully")
 
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def getUsers(request):
-    token = request.data.get('token')
-    if not staff_perm(token):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    
     paginator = PageNumberPagination()
     if 'page_size' in request.GET:
         paginator.page_size = int(request.GET['page_size'])
@@ -35,7 +39,6 @@ def getUsers(request):
     result_page = paginator.paginate_queryset(users, request)
     serializer = MyUserSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
-
 
 @api_view(['POST'])
 def createUser(request):
@@ -56,14 +59,9 @@ def createUser(request):
             user = MyUser(**dict_info)
             user.set_password(request.data.get('password'))
             user.save()
-            payload = {
-                    'phone': request.data.get('phone')
-                }
-            token = generate_token(payload)
             response = Response()
             response.data = {
-                'token': token,
-                'message': 'User created',
+                'message': 'User created, now you can login',
             }
             return response
         except:
@@ -72,12 +70,16 @@ def createUser(request):
         return Response(data={"message": "required fields not present"},status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-def deleteUser(request, pk):    
-    token = request.data.get('token')
-    enc_info = validate_token(token)
-    if not enc_info or pk != enc_info.get('phone'):
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    
+@permission_classes([IsAuthenticated])
+def deleteUser(request, pk): 
+    JWT_authenticator = JWTAuthentication()
+
+    # authenitcate() verifies and decode the token
+    # if token is invalid, it raises an exception and returns 401
+    response = JWT_authenticator.authenticate(request)
+    user , token = response
+    if user.phone != pk:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)   
     try:
         user = MyUser.objects.get(phone=pk)
     except Exception as e:
@@ -89,10 +91,15 @@ def deleteUser(request, pk):
 
 
 @api_view(['GET'])
-def getUser(request, pk):
-    token = request.GET.get('token')
-    enc_info = validate_token(token)
-    if not enc_info or pk != enc_info.get('phone'):
+@permission_classes([IsAuthenticated])
+def getUser(request, pk):    
+    JWT_authenticator = JWTAuthentication()
+
+    # authenitcate() verifies and decode the token
+    # if token is invalid, it raises an exception and returns 401
+    response = JWT_authenticator.authenticate(request)
+    user , token = response
+    if user.phone != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         user = MyUser.objects.get(phone=pk)
@@ -104,15 +111,18 @@ def getUser(request, pk):
     return Response(serializer.data)
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def updateUser(request, pk):
-    dict_info = request.data
-    token = dict_info.get('token')
-    enc_info = validate_token(token)
-    phone = enc_info.get('phone')
-    if not enc_info or pk != phone:
+    JWT_authenticator = JWTAuthentication()
+
+    # authenitcate() verifies and decode the token
+    # if token is invalid, it raises an exception and returns 401
+    response = JWT_authenticator.authenticate(request)
+    user , token = response
+    if user.phone != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    dict_info.pop('token')
-    dict_info['phone'] = phone
+    dict_info = request.data
+    dict_info['phone'] = pk
     user = MyUser(**dict_info)
     if dict_info.get('password'):
         user.set_password(dict_info.get('password'))
@@ -120,33 +130,8 @@ def updateUser(request, pk):
     return Response(data={"message": "user updated"})
 
 @api_view(['POST'])
-def login(request):
-    phone = int(request.data.get('phone'))
-    try:
-        user = MyUser.objects.get(phone=phone)
-        password = request.data.get('password')
-        
-        if user.check_password(password):
-            payload = {
-                    'phone': phone
-                }
-            token = generate_token(payload)
-            response = Response()
-            response.data = {
-                'token': token,
-                'message': 'Logged in succesfully',
-            }
-            return response
-        else :
-            content = {'message': 'incorrect password'}
-    except Exception as e:
-        content = {'message': str(e)}
-
-    return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['POST'])
 def sendOTP(request):
-    phone = request.data['phone']
+    phone = request.data.get('phone')
 	
     try:
         otp_row = OTPModel.objects.get(phone=phone)
@@ -168,7 +153,6 @@ def sendOTP(request):
 def verifyOTP(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-    print(phone, otp)
     if phone and otp:
         phone=int(phone)
         otp = str(otp)
@@ -178,14 +162,32 @@ def verifyOTP(request):
             otp_row = None
         if otp_row:
             if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()): 
-                otp_row.delete()  
-                payload = {
-                    'phone': phone
-                }
-                token = generate_token(payload)
+                otp_row.delete() 
+                user = MyUser.objects.get(phone=phone)
+                token = get_tokens_for_user(user)
 
                 return Response(data={"token": token})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
         
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def nearest_delivery(request):
+    import geopy.distance
+    lat = float(request.data.get('lat'))
+    long = float(request.data.get('long'))
+
+    delivery_users = MyUser.objects.filter(user_category='Delivery').filter(is_free=True)
+    nr_dist = -1
+    phone_nearest = None
+    for user in delivery_users:
+        ps_dist = get_distance((lat, long), (user.current_lat, user.current_long))
+        if (nr_dist == -1) or (nr_dist > ps_dist):
+            nr_dist = ps_dist
+            phone_nearest = user.phone
+
+    if nr_dist == -1:
+        return Response({"message": "No delivery partners free"})
+    return Response({"delivery_phone": phone_nearest})
