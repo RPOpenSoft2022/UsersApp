@@ -107,7 +107,7 @@ def login(request):
         user = MyUser.objects.get(phone=phone)
         password = request.data.get('password')
         
-        if user.password == password:
+        if user.check_password(password):
             payload = {
                     'phone': phone
                 }
