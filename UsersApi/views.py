@@ -55,6 +55,7 @@ def createUser(request):
         try:
             user = MyUser(**dict_info)
             user.set_password(request.data.get('password'))
+            user.save()
             payload = {
                     'phone': request.data.get('phone')
                 }
