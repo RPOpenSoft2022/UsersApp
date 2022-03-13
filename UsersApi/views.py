@@ -16,7 +16,9 @@ import jwt
 from rest_framework.pagination import PageNumberPagination
 from datetime import timedelta
 from django.utils import timezone
-from .utilities import validate_token, generate_token, staff_perm
+from .utilities import validate_token, generate_token, staff_perm, sendMessage
+import random
+
 
 @api_view(['GET'])
 def getUsers(request):
@@ -126,7 +128,7 @@ def login(request):
 @api_view(['POST'])
 def sendOTP(request):
     phone = request.data['phone']
-
+	
     try:
         otp_row = OTPModel.objects.get(phone=phone)
     except:
@@ -136,8 +138,9 @@ def sendOTP(request):
         if otp_row.valid_until > timezone.now():
             return Response(data={"message": "OTP already sent"})
         otp_row.delete()
-
-    newOTP = OTPModel(phone=phone, otp=999999)
+    otp = random.randint(100000,999999)
+    sendMessage(phone, f'Your OTP is {otp}')
+    newOTP = OTPModel(phone=phone, otp=otp)
     newOTP.save()
     return Response(data={"message": "OTP send"})
 
