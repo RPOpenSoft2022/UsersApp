@@ -122,8 +122,9 @@ def updateUser(request, pk):
     if user.phone != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     dict_info = request.data
-    dict_info['phone'] = pk
-    user = MyUser(**dict_info)
+
+    for attr, value in dict_info.items(): 
+        setattr(user, attr, value)
     if dict_info.get('password'):
         user.set_password(dict_info.get('password'))
     user.save()
@@ -176,7 +177,6 @@ def verifyOTP(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def nearest_delivery(request):
-    import geopy.distance
     lat = float(request.data.get('lat'))
     long = float(request.data.get('long'))
 
@@ -186,6 +186,7 @@ def nearest_delivery(request):
     for user in delivery_users:
         ps_dist = get_distance((lat, long), (user.current_lat, user.current_long))
         if (nr_dist == -1) or (nr_dist > ps_dist):
+            
             nr_dist = ps_dist
             phone_nearest = user.phone
 

@@ -12,4 +12,4 @@ def sendMessage(phone, message):
 
 def get_distance(coord1, coord2):
     import geopy.distance
-    return geopy.distance.vincenty(coord1, coord2).km
+    return geopy.distance.distance(coord1, coord2).km
