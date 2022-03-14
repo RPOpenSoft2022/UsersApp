@@ -123,12 +123,15 @@ def updateUser(request, pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     dict_info = request.data
 
-    for attr, value in dict_info.items(): 
-        setattr(user, attr, value)
-    if dict_info.get('password'):
-        user.set_password(dict_info.get('password'))
-    user.save()
-    return Response(data={"message": "user updated"})
+    try:
+        for attr, value in dict_info.items(): 
+            setattr(user, attr, value)
+        if dict_info.get('password'):
+            user.set_password(dict_info.get('password'))
+        user.save()
+        return Response(data={"message": "user updated"})
+    except:
+        return Response(data={"message":"user not updated"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def sendOTP(request):
@@ -144,10 +147,13 @@ def sendOTP(request):
             return Response(data={"message": "OTP already sent"})
         otp_row.delete()
     otp = random.randint(100000,999999)
-    sendMessage(phone, f'Your OTP is {otp}')
-    newOTP = OTPModel(phone=phone, otp=otp)
-    newOTP.save()
-    return Response(data={"message": "OTP send"})
+    try:
+        sendMessage(phone, f'Your OTP is {otp}')
+        newOTP = OTPModel(phone=phone, otp=otp)
+        newOTP.save()
+        return Response(data={"message": "OTP send"})
+    except:
+        return Response(data={"message":"OTP not send"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
