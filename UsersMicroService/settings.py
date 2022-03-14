@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'UsersApi.apps.UsersapiConfig',
     'rest_framework',
-    # 'rest_framework_simplejwt.tokens',
+    'rest_framework_simplejwt.token_blacklist',
     'rest_framework_simplejwt',
 ]
 
@@ -72,8 +72,10 @@ TEMPLATES = [
     },
 ]
 
+AUTH_USER_MODEL = 'UsersApi.MyUser'
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
@@ -89,13 +91,13 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+    'USER_ID_FIELD': 'phone',
+    'USER_ID_CLAIM': 'phone',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
 
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+    'TOKEN_USER_CLASS': 'UsersApi.MyUser',
 
     'JTI_CLAIM': 'jti',
 
@@ -165,10 +167,6 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-
-OTP_EXPIRE_TIME = 300 # in seconds
-TOKEN_EXPIRE_TIME = 30*60 # in seconds
-SIGNATURE = 'Thlg-mlbaJeaHKTsc7LIRZNRsy1by-sjmzMdn7cc8FI'
 
 # Twilio Configuration
 ACCOUNT_SID = 'AC83ab35d442326feb2880a232e9a5a81f'

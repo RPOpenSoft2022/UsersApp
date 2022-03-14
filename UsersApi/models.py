@@ -36,7 +36,7 @@ class MyUserManager(BaseUserManager):
 			password = password,
 			phone = phone
 		)
-
+		user.user_category = 'Staff'
 		user.is_admin = True
 		user.is_superuser = True
 		user.is_staff = True
@@ -76,9 +76,9 @@ class MyUser(AbstractBaseUser):
 	is_staff = models.BooleanField(default=False)
 	is_superuser = models.BooleanField(default=False)
 
-	USERNAME_FIELD = "phone"
+	USERNAME_FIELD = 'phone'
 
-	REQUIRED_FIELDS = ['email', 'phone', 'user_category', 'password']
+	REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'password']
 
 	objects = MyUserManager()
 
@@ -92,7 +92,6 @@ class MyUser(AbstractBaseUser):
 class OTPModel(models.Model):
 	phone = models.BigIntegerField()
 	otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
-	#time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
 	valid_until = models.DateTimeField(
         default=timezone.now() + timedelta(seconds=300),
         help_text="The timestamp of the moment of expiry of the saved token."
