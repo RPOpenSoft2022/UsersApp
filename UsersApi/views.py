@@ -19,27 +19,6 @@ from django.utils import timezone
 from .utilities import validate_token, generate_token, staff_perm, sendMessage
 import random
 
-<<<<<<< HEAD
-# This is a sample working of API
-# create like this for other APIs
-# GET, POST, PUT OR DELETE
-@api_view(['GET'])
-def testApi(request):
-	return Response("Api Working!!")
-
-@api_view(['GET'])
-def VerifyOTP(request):
-	phone = request.data["phone"]
-	otp = request.data["otp"]
-	OTPSent = OTPModel.objects.get(phone_number=phone)
-	user = MyUser.objects.get(phone=phone)
-
-	if otp == OTPSent.otp and (OTPSent.valid_until + timedelta(seconds=300))<timezone.now:
-		return Response(data=(user,get_tokens_for_user(user)))
-	else:
-		return Response('Unauthorized', status=401)
-=======
->>>>>>> 37ebb89713a710e7c680c4f15bbc7343205ca7a6
 
 @api_view(['GET'])
 def getUsers(request):
