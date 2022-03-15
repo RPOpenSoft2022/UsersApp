@@ -87,10 +87,10 @@ def deleteUser(request, pk):
     # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.phone != pk:
+    if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = MyUser.objects.get(phone=pk)
+        user = MyUser.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -108,10 +108,10 @@ def getUser(request, pk):
     # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.phone != pk:
+    if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = MyUser.objects.get(phone=pk)
+        user = MyUser.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -129,7 +129,7 @@ def updateUser(request, pk):
     # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.phone != pk:
+    if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     dict_info = request.data
 
@@ -174,7 +174,7 @@ def sendOTP(request):
 def verifyOTP(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-    newPassword = request.data.get('password')
+    newPassword = request.data.get('new-password')
     if phone and otp:
         phone = int(phone)
         otp = str(otp)
@@ -196,26 +196,3 @@ def verifyOTP(request):
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def nearest_delivery(request):
-    lat = float(request.data.get('lat'))
-    long = float(request.data.get('long'))
-
-    delivery_users = MyUser.objects.filter(
-        user_category='Delivery').filter(is_free=True)
-    nr_dist = -1
-    phone_nearest = None
-    for user in delivery_users:
-        ps_dist = get_distance(
-            (lat, long), (user.current_lat, user.current_long))
-        if (nr_dist == -1) or (nr_dist > ps_dist):
-
-            nr_dist = ps_dist
-            phone_nearest = user.phone
-
-    if nr_dist == -1:
-        return Response({"message": "No delivery partners free"})
-    return Response({"delivery_phone": phone_nearest})
