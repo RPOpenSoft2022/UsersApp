@@ -36,49 +36,10 @@ def getUsers(request):
     serializer = UserSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
-
-@api_view(['POST'])
-def createUser(request):
-    req_fields = ['email', 'phone', 'password']
-    dict_info = request.data
-    try:
-        dict_info.pop('user_category')
-    except:
-        pass
-    
-    all_prs = True
-    for field in req_fields:
-        all_prs = all_prs and (field in dict_info)
-    if all_prs:
-        try:
-            user = User.objects.get(phone=request.data.get('phone'))
-        except:
-            user = None
-        if user:
-            return Response({"message": "A user with this phone already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User(**dict_info)
-            user.set_password(request.data.get('password'))
-            user.save()
-            response = Response()
-            response.data = {
-                'message': 'User created, now you can login',
-            }
-            return response
-        except:
-            return Response(data={"message": "user not created"}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response(data={"message": "required fields not present"}, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(['POST'])
 def signUpView(request):
     user_data = request.data
-    
 
-    # user_data.pop('password1')
-    # user_data.pop('password2')
     if 'user_category' in user_data:
         user_data.pop('user_category')
 
