@@ -15,7 +15,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 	path('verify-otp/', views.verifyOTP, name='verify-otp'),
 	path('send-otp/', views.sendOTP, name='send-otp'),
-	path('nearest-delivery/', views.nearest_delivery, name='nearest-delivery'),
 	path('logout/', views.BlacklistRefreshView.as_view(), name="logout"),
 	path('signup/', views.signUpView, name="signup"),
 	path('add/<str:pk>/', views.addEmployee, name="addEmployees"),
