@@ -20,6 +20,7 @@ from django.utils import timezone
 from .utilities import sendMessage, get_distance
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
+import pandas as pd
 
 class BlacklistRefreshView(APIView):
     def post(self, request):
