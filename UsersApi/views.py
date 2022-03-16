@@ -51,7 +51,7 @@ def createUser(request):
         dict_info.pop('user_category')
     except:
         pass
-
+    
     all_prs = True
     for field in req_fields:
         all_prs = all_prs and (field in dict_info)
@@ -117,6 +117,35 @@ def signUpView(request):
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def signUpView(request):
+    user_data = request.data['user_data']
+    customer_data = request.data['customer_data']
+
+    # user_data.pop('password1')
+    # user_data.pop('password2')
+    if 'user_category' in user_data:
+        user_data.pop('user_category')
+
+    serializer = UserSerializer(data=user_data, many=False)
+    if serializer.is_valid():
+        serializer.save()
+        user = User.objects.get(phone = user_data["phone"])
+
+        if user_data["password1"] != user_data["password2"]:
+            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(request.data['user_data']["password1"])
+        user.save()
+    else:
+        return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = CustomerSerializer(data=customer_data, many=False)
+    if serializer.is_valid():
+        serializer.save(user=user)
+        return Response({'messsge':'Successfully Signed Up! Head over to login'})
+    else:
+        return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def deleteUser(request, pk):
@@ -178,13 +207,14 @@ def updateUser(request, pk):
         pass
 
     try:
-        for attr, value in dict_info.items():
+        for attr, value in dict_info.items(): 
             setattr(user, attr, value)
+        # if dict_info.get('password'):
+        #     user.set_password(dict_info.get('password'))
         user.save()
         return Response(data={"message": "user updated"})
     except:
-        return Response(data={"message": "user not updated"}, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response(data={"message":"user not updated"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def sendOTP(request):
@@ -199,14 +229,14 @@ def sendOTP(request):
         if otp_row.valid_until > timezone.now():
             return Response(data={"message": "OTP already sent"})
         otp_row.delete()
-    otp = random.randint(100000, 999999)
+    otp = random.randint(100000,999999)
     try:
         sendMessage(phone, f'Your OTP is {otp}')
         newOTP = OTPModel(phone=phone, otp=otp)
         newOTP.save()
         return Response(data={"message": "OTP send"})
     except:
-        return Response(data={"message": "OTP not send"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message":"OTP not send"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -251,3 +281,17 @@ def nearest_delivery(request):
     if nr_dist == -1:
         return Response({"message": "No delivery partners free"})
     return Response({"delivery_phone": phone_nearest})
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def addEmployee(request, pk):
+    sheet = request.FILES['sheet']
+    print(sheet)
+    df = pd.read_csv(sheet)
+    print(df.head())
+    for index, row in df.iterrows():
+        print(row["phone"])
+        user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
+        user.set_password(row["password"])
+        user.save()
+    return Response({"message": f"Added {pk} data succesfully!"})

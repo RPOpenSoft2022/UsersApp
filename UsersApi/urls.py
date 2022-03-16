@@ -18,4 +18,9 @@ urlpatterns = [
 	path('nearest-delivery/', views.nearest_delivery, name='nearest-delivery'),
 	path('logout/', views.BlacklistRefreshView.as_view(), name="logout"),
 	path('signup/', views.signUpView, name="signup"),
+<<<<<<< HEAD
+=======
+	path('add/<str:pk>/', views.addEmployee, name="addEmployees"),
+
+>>>>>>> a113455dc421ba8539b68e5bb3b375a3f71f629a
 ]
