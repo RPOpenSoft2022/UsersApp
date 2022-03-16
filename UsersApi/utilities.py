@@ -1,5 +1,6 @@
 from django.conf import settings
 from twilio.rest import Client
+import geopy.distance
 
 def sendMessage(phone, message):
     account_sid = settings.ACCOUNT_SID
@@ -11,5 +12,4 @@ def sendMessage(phone, message):
         to='+91'+phone)
 
 def get_distance(coord1, coord2):
-    import geopy.distance
     return geopy.distance.distance(coord1, coord2).km
