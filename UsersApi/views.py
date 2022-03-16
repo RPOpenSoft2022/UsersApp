@@ -1,7 +1,3 @@
-from os import stat
-from pstats import Stats
-from django.shortcuts import render
-from django.http import JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -12,12 +8,10 @@ from .models import OTPModel
 from .serializers import *
 from rest_framework.views import APIView
 from .models import User, UserManager
-from datetime import date, datetime
-import jwt
+from datetime import date, datetime, timedelta
 from rest_framework.pagination import PageNumberPagination
-from datetime import timedelta
 from django.utils import timezone
-from .utilities import sendMessage, get_distance
+from .utilities import sendMessage
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
 import pandas as pd
