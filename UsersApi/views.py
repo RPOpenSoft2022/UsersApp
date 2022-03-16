@@ -94,10 +94,10 @@ def signUpView(request):
         serializer.save()
         user = User.objects.get(phone = user_data["phone"])
 
-        user.set_password(request.data['user_data']["password"])
+        user.set_password(request.data["password"])
         user.save()
 
-        user_data['user'] = user
+        user_data['user'] = user.id
         # pop fields not required in customer
         user_data.pop('phone')
         user_data.pop('email')
@@ -112,36 +112,7 @@ def signUpView(request):
         serializer.save()
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
-        return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['POST'])
-# def signUpView(request):
-#     user_data = request.data['user_data']
-#     customer_data = request.data['customer_data']
-
-#     # user_data.pop('password1')
-#     # user_data.pop('password2')
-#     if 'user_category' in user_data:
-#         user_data.pop('user_category')
-
-#     serializer = UserSerializer(data=user_data, many=False)
-#     if serializer.is_valid():
-#         serializer.save()
-#         user = User.objects.get(phone = user_data["phone"])
-
-#         if user_data["password1"] != user_data["password2"]:
-#             return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user.set_password(request.data['user_data']["password1"])
-#         user.save()
-#     else:
-#         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-#     serializer = CustomerSerializer(data=customer_data, many=False)
-#     if serializer.is_valid():
-#         serializer.save(user=user)
-#         return Response({'messsge':'Successfully Signed Up! Head over to login'})
-#     else:
-#         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -155,7 +126,7 @@ def deleteUser(request, pk):
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = User.objects.get(phone=pk)
+        user = User.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -176,11 +147,14 @@ def getUser(request, pk):
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = User.objects.get(phone=pk)
+        user = User.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = UserSerializer(user)
+
+    if user.user_category == 'Customer':
+        return Response({**serializer.data, **CustomerSerializer(user.customer).data})
 
     return Response(serializer.data)
 
@@ -204,10 +178,16 @@ def updateUser(request, pk):
         pass
 
     try:
+        if dict_info.get('phone'):
+            setattr(user, 'phone', dict_info.pop('phone'))
+        if dict_info.get('email'):
+            setattr(user, 'email', dict_info.pop('email'))
+            
         for attr, value in dict_info.items(): 
-            setattr(user, attr, value)
+            setattr(user.customer, attr, value)
         # if dict_info.get('password'):
         #     user.set_password(dict_info.get('password'))
+        user.customer.save()
         user.save()
         return Response(data={"message": "user updated"})
     except:
@@ -240,8 +220,8 @@ def sendOTP(request):
 def verifyOTP(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-    newPassword = request.data.get('new-password')
-    if phone and otp:
+    newPassword = request.data.get('newPassword')
+    if phone and otp and newPassword:
         phone = int(phone)
         otp = str(otp)
         try:
@@ -254,9 +234,13 @@ def verifyOTP(request):
                 user = User.objects.get(phone=phone)
                 token = get_tokens_for_user(user)
 
+                if newPassword:
+                    user.set_password(newPassword)
                 return Response(data={"token": token, "message": "Password updated"})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
