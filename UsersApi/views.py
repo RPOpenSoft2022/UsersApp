@@ -42,8 +42,13 @@ def getUsers(request):
 
 @api_view(['POST'])
 def createUser(request):
-    req_fields = ['email', 'phone', 'user_category', 'password']
+    req_fields = ['email', 'phone', 'password']
     dict_info = request.data
+    try:
+        dict_info.pop('user_category')
+    except:
+        pass
+    
     all_prs = True
     for field in req_fields:
         all_prs = all_prs and (field in dict_info)
@@ -124,10 +129,15 @@ def updateUser(request, pk):
     dict_info = request.data
 
     try:
+        dict_info.pop('password')
+    except:
+        pass
+
+    try:
         for attr, value in dict_info.items(): 
             setattr(user, attr, value)
-        if dict_info.get('password'):
-            user.set_password(dict_info.get('password'))
+        # if dict_info.get('password'):
+        #     user.set_password(dict_info.get('password'))
         user.save()
         return Response(data={"message": "user updated"})
     except:
