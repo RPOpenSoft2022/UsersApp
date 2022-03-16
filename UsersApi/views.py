@@ -20,7 +20,7 @@ from django.utils import timezone
 from .utilities import sendMessage, get_distance
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
-
+import pandas as pd
 
 class BlacklistRefreshView(APIView):
     def post(self, request):
@@ -91,60 +91,57 @@ def signUpView(request):
     basic_info = {'phone': user_data.get('phone'),'email': user_data.get('email')}
     serializer = UserSerializer(data=basic_info, many=False)
     if serializer.is_valid():
-        if user_data.get('password1') and (user_data["password1"] != user_data["password2"]):
-            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer.save()
         user = User.objects.get(phone = user_data["phone"])
 
-        user.set_password(request.data['user_data']["password1"])
+        user.set_password(request.data['user_data']["password"])
         user.save()
 
         user_data['user'] = user
         # pop fields not required in customer
         user_data.pop('phone')
         user_data.pop('email')
+        user_data.pop('password')
 
     else:
         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = CustomerSerializer(data=user_data, many=False)
     
-    user_data['first_name']= first_name
     if serializer.is_valid():
         serializer.save()
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def signUpView(request):
-    user_data = request.data['user_data']
-    customer_data = request.data['customer_data']
+# @api_view(['POST'])
+# def signUpView(request):
+#     user_data = request.data['user_data']
+#     customer_data = request.data['customer_data']
 
-    # user_data.pop('password1')
-    # user_data.pop('password2')
-    if 'user_category' in user_data:
-        user_data.pop('user_category')
+#     # user_data.pop('password1')
+#     # user_data.pop('password2')
+#     if 'user_category' in user_data:
+#         user_data.pop('user_category')
 
-    serializer = UserSerializer(data=user_data, many=False)
-    if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(phone = user_data["phone"])
+#     serializer = UserSerializer(data=user_data, many=False)
+#     if serializer.is_valid():
+#         serializer.save()
+#         user = User.objects.get(phone = user_data["phone"])
 
-        if user_data["password1"] != user_data["password2"]:
-            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
+#         if user_data["password1"] != user_data["password2"]:
+#             return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user.set_password(request.data['user_data']["password1"])
-        user.save()
-    else:
-        return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    serializer = CustomerSerializer(data=customer_data, many=False)
-    if serializer.is_valid():
-        serializer.save(user=user)
-        return Response({'messsge':'Successfully Signed Up! Head over to login'})
-    else:
-        return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
+#         user.set_password(request.data['user_data']["password1"])
+#         user.save()
+#     else:
+#         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#     serializer = CustomerSerializer(data=customer_data, many=False)
+#     if serializer.is_valid():
+#         serializer.save(user=user)
+#         return Response({'messsge':'Successfully Signed Up! Head over to login'})
+#     else:
+#         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -260,27 +257,6 @@ def verifyOTP(request):
                 return Response(data={"token": token, "message": "Password updated"})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def nearest_delivery(request):
-    lat = float(request.data.get('lat'))
-    long = float(request.data.get('long'))
-
-    delivery_users = User.objects.filter(user_category='Delivery').filter(is_free=True)
-    nr_dist = -1
-    phone_nearest = None
-    for user in delivery_users:
-        ps_dist = get_distance((lat, long), (user.current_lat, user.current_long))
-        if (nr_dist == -1) or (nr_dist > ps_dist):
-            
-            nr_dist = ps_dist
-            phone_nearest = user.phone
-
-    if nr_dist == -1:
-        return Response({"message": "No delivery partners free"})
-    return Response({"delivery_phone": phone_nearest})
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])

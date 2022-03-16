@@ -97,7 +97,7 @@ SIMPLE_JWT = {
 
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-    'TOKEN_USER_CLASS': 'UsersApi.MyUser',
+    'TOKEN_USER_CLASS': 'UsersApi.User',
 
     'JTI_CLAIM': 'jti',
 
