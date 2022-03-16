@@ -20,6 +20,7 @@ from django.utils import timezone
 from .utilities import sendMessage, get_distance
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
+import pandas as pd
 
 class BlacklistRefreshView(APIView):
     def post(self, request):
@@ -97,8 +98,9 @@ def signUpView(request):
     else:
         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     serializer = CustomerSerializer(data=customer_data, many=False)
+
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(user=user)
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
@@ -239,3 +241,15 @@ def nearest_delivery(request):
         return Response({"message": "No delivery partners free"})
     return Response({"delivery_phone": phone_nearest})
 
+@api_view(['POST'])
+def addEmployee(request, pk):
+    sheet = request.FILES['sheet']
+    print(sheet)
+    df = pd.read_csv(sheet)
+    print(df.head())
+    for index, row in df.iterrows():
+        print(row["phone"])
+        user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
+        user.set_password(row["password"])
+        user.save()
+    return Response({"message": f"Added {pk} data succesfully!"})
