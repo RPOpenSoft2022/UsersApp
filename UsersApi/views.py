@@ -76,27 +76,37 @@ def createUser(request):
 
 @api_view(['POST'])
 def signUpView(request):
-    user_data = request.data['user_data']
-    customer_data = request.data['customer_data']
+    user_data = request.data
+    
 
     # user_data.pop('password1')
     # user_data.pop('password2')
     if 'user_category' in user_data:
         user_data.pop('user_category')
 
-    serializer = UserSerializer(data=user_data, many=False)
+    basic_info = {'phone': user_data.get('phone'),'email': user_data.get('email')}
+    serializer = UserSerializer(data=basic_info, many=False)
     if serializer.is_valid():
+        if user_data.get('password1') and (user_data["password1"] != user_data["password2"]):
+            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer.save()
         user = User.objects.get(phone = user_data["phone"])
 
-        if user_data["password1"] != user_data["password2"]:
-            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
-
         user.set_password(request.data['user_data']["password1"])
         user.save()
+
+        user_data['user'] = user
+        # pop fields not required in customer
+        user_data.pop('phone')
+        user_data.pop('email')
+
     else:
         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    serializer = CustomerSerializer(data=customer_data, many=False)
+
+    serializer = CustomerSerializer(data=user_data, many=False)
+    
+    user_data['first_name']= first_name
     if serializer.is_valid():
         serializer.save()
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
@@ -123,7 +133,7 @@ def deleteUser(request, pk):
 
     return Response({'message': 'User data deleted'})
 
-
+# accept id of User table
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUser(request, pk):    
