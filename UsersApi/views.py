@@ -9,9 +9,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from .tokens import get_tokens_for_user
 from .models import OTPModel
-from .serializers import MyUserSerializer
+from .serializers import *
 from rest_framework.views import APIView
-from .models import MyUser, MyUserManager
+from .models import User, UserManager
 from datetime import date, datetime
 import jwt
 from rest_framework.pagination import PageNumberPagination
@@ -35,9 +35,9 @@ def getUsers(request):
         paginator.page_size = int(request.GET['page_size'])
     else:
         paginator.page_size = 10
-    users = MyUser.objects.all()
+    users = User.objects.all()
     result_page = paginator.paginate_queryset(users, request)
-    serializer = MyUserSerializer(result_page, many=True)
+    serializer = UserSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
 @api_view(['POST'])
@@ -54,14 +54,14 @@ def createUser(request):
         all_prs = all_prs and (field in dict_info)
     if all_prs:
         try:
-            user = MyUser.objects.get(phone=request.data.get('phone'))
+            user = User.objects.get(phone=request.data.get('phone'))
         except:
             user = None
         if user:
             return Response({"message": "A user with this phone already exists"},status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = MyUser(**dict_info)
+            user = User(**dict_info)
             user.set_password(request.data.get('password'))
             user.save()
             response = Response()
@@ -73,6 +73,35 @@ def createUser(request):
             return Response(data={"message": "user not created"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response(data={"message": "required fields not present"},status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def signUpView(request):
+    user_data = request.data['user_data']
+    customer_data = request.data['customer_data']
+
+    # user_data.pop('password1')
+    # user_data.pop('password2')
+    if 'user_category' in user_data:
+        user_data.pop('user_category')
+
+    serializer = UserSerializer(data=user_data, many=False)
+    if serializer.is_valid():
+        serializer.save()
+        user = User.objects.get(phone = user_data["phone"])
+
+        if user_data["password1"] != user_data["password2"]:
+            return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(request.data['user_data']["password1"])
+        user.save()
+    else:
+        return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = CustomerSerializer(data=customer_data, many=False)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'messsge':'Successfully Signed Up! Head over to login'})
+    else:
+        return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -86,7 +115,7 @@ def deleteUser(request, pk):
     if user.phone != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)   
     try:
-        user = MyUser.objects.get(phone=pk)
+        user = User.objects.get(phone=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -107,11 +136,11 @@ def getUser(request, pk):
     if user.phone != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = MyUser.objects.get(phone=pk)
+        user = User.objects.get(phone=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = MyUserSerializer(user)
+    serializer = UserSerializer(user)
 
     return Response(serializer.data)
 
@@ -180,7 +209,7 @@ def verifyOTP(request):
         if otp_row:
             if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()): 
                 otp_row.delete() 
-                user = MyUser.objects.get(phone=phone)
+                user = User.objects.get(phone=phone)
                 token = get_tokens_for_user(user)
 
                 return Response(data={"token": token})
@@ -196,7 +225,7 @@ def nearest_delivery(request):
     lat = float(request.data.get('lat'))
     long = float(request.data.get('long'))
 
-    delivery_users = MyUser.objects.filter(user_category='Delivery').filter(is_free=True)
+    delivery_users = User.objects.filter(user_category='Delivery').filter(is_free=True)
     nr_dist = -1
     phone_nearest = None
     for user in delivery_users:
@@ -209,3 +238,4 @@ def nearest_delivery(request):
     if nr_dist == -1:
         return Response({"message": "No delivery partners free"})
     return Response({"delivery_phone": phone_nearest})
+
