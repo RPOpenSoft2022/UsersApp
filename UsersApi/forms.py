@@ -9,7 +9,7 @@ class RegistratinForm(UserCreationForm):
 
     class Meta:
         model = MyUser
-        fields = ("phone","password","user_category","email","age","address","first_name","middle_name","last_name","gender","food_preference")
+        fields = ("phone","user_category","email","age","address","first_name","middle_name","last_name","gender","food_preference")
     
     def clean(self):
         '''
