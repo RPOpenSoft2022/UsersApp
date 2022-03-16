@@ -1,6 +1,9 @@
+from multiprocessing import context
 from os import stat
 from pstats import Stats
-from django.shortcuts import render
+from django.shortcuts import render,redirect
+from django.contrib.auth import login,authenticate
+from django import forms
 from django.http import JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
@@ -20,6 +23,7 @@ from django.utils import timezone
 from .utilities import sendMessage, get_distance
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
+from .forms import RegistratinForm
 
 class BlacklistRefreshView(APIView):
     def post(self, request):
@@ -209,3 +213,23 @@ def nearest_delivery(request):
     if nr_dist == -1:
         return Response({"message": "No delivery partners free"})
     return Response({"delivery_phone": phone_nearest})
+
+@api_view(['POST'])
+def registration_view(request):
+    context = {}
+    form = RegistratinForm(request.POST)
+    if form.is_valid():
+        form.save()
+        phone = form.cleaned_data.get('phone')
+        email = form.cleaned_data.get('email')
+        password = form.cleaned_data.get('password1')
+        first_name = form.cleaned_data.get('first_name')
+        last_name = form.cleaned_data.get('last_name')
+        account = authenticate(phone=phone,email=email,password=password,first_name=first_name,last_name=last_name)
+        login(request,account)
+        return redirect('login')
+    else:
+        context['registration_form']= form
+
+            
+
