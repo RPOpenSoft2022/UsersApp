@@ -242,6 +242,7 @@ def nearest_delivery(request):
     return Response({"delivery_phone": phone_nearest})
 
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def addEmployee(request, pk):
     sheet = request.FILES['sheet']
     print(sheet)
