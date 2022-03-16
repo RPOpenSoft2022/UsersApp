@@ -102,7 +102,7 @@ def signUpView(request):
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def deleteUser(request, pk): 
@@ -238,3 +238,17 @@ def nearest_delivery(request):
     if nr_dist == -1:
         return Response({"message": "No delivery partners free"})
     return Response({"delivery_phone": phone_nearest})
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def addEmployee(request, pk):
+    sheet = request.FILES['sheet']
+    print(sheet)
+    df = pd.read_csv(sheet)
+    print(df.head())
+    for index, row in df.iterrows():
+        print(row["phone"])
+        user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
+        user.set_password(row["password"])
+        user.save()
+    return Response({"message": f"Added {pk} data succesfully!"})
