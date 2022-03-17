@@ -38,7 +38,7 @@ def getUsers(request):
 
 @api_view(['POST'])
 def signUpView(request):
-    user_data = request.data
+    user_data = request.data.copy()
 
     if 'user_category' in user_data:
         user_data.pop('user_category')
@@ -125,7 +125,7 @@ def updateUser(request, pk):
     user, token = response
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    dict_info = request.data
+    dict_info = request.data.copy()
 
     try:
         dict_info.pop('password')
@@ -137,12 +137,11 @@ def updateUser(request, pk):
             setattr(user, 'phone', dict_info.pop('phone'))
         if dict_info.get('email'):
             setattr(user, 'email', dict_info.pop('email'))
-            
-        for attr, value in dict_info.items(): 
-            setattr(user.customer, attr, value)
-        # if dict_info.get('password'):
-        #     user.set_password(dict_info.get('password'))
-        user.customer.save()
+
+        if user.user_category == 'Customer':    
+            for attr, value in dict_info.items(): 
+                setattr(user.customer, attr, value)
+            user.customer.save()
         user.save()
         return Response(data={"message": "user updated"})
     except:
