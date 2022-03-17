@@ -244,12 +244,12 @@ def nearest_delivery(request):
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def addEmployee(request, pk):
+    if pk not in ['Staff', 'Delivery']:
+        return Response({"message": "Invalid User Category selected!"}, status=status.HTTP_400_BAD_REQUEST)
+
     sheet = request.FILES['sheet']
-    print(sheet)
     df = pd.read_csv(sheet)
-    print(df.head())
     for index, row in df.iterrows():
-        print(row["phone"])
         user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
         user.set_password(row["password"])
         user.save()
