@@ -50,8 +50,6 @@ def signUpView(request):
         user = User.objects.get(phone = user_data["phone"])
 
         user.set_password(request.data["password"])
-        user.save()
-
         user_data['user'] = user.id
         # pop fields not required in customer
         user_data.pop('phone')
@@ -65,6 +63,7 @@ def signUpView(request):
     
     if serializer.is_valid():
         serializer.save(user=user)
+        user.save()
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
