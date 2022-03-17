@@ -261,6 +261,9 @@ def verifyOTP(request):
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def addEmployee(request, pk):
+    if pk not in ['Staff', 'Delivery']:
+        return Response(data={"message": "Invalid User Category!"}, status=status.HTTP_400_BAD_REQUEST)
+        
     sheet = request.FILES['sheet']
     print(sheet)
     df = pd.read_csv(sheet)

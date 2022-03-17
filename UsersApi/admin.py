@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ('email', 'last_login', 'is_admin', 'is_active',)
+    list_display = ('id', 'email', 'last_login', 'is_admin', 'is_active',)
     search_fields = ('email', 'phone',)
     readonly_fields = ('last_login',)
     filter_horizontal = ()
