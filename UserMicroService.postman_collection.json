@@ -421,9 +421,86 @@
 				{
 					"name": "add_staff",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
-						"url": null
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/home/shobhit/Downloads/Staff_sheet.xlsx"
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/add/Staff/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"add",
+								"Staff",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add_delivery",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "sheet",
+									"type": "file",
+									"src": "/home/shobhit/Downloads/Delivery_sheet - Sheet1.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/add/Delivery/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"add",
+								"Delivery",
+								""
+							]
+						}
 					},
 					"response": []
 				}

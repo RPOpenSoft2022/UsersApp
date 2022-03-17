@@ -166,8 +166,8 @@ def sendOTP(request):
         newOTP = OTPModel(phone=phone, otp=otp)
         newOTP.save()
         return Response(data={"message": "OTP send"})
-    except:
-        return Response(data={"message":"OTP not send"}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(data={"message":f"OTP not send, {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
