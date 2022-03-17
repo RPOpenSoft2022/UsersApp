@@ -81,35 +81,42 @@ def createUser(request):
 @api_view(['POST'])
 def signUpView(request):
     user_data = request.data
-    
+    JWT_authenticator = JWTAuthentication()
+
+    # authenitcate() verifies and decode the token
+    # if token is invalid, it raises an exception and returns 401
+    response = JWT_authenticator.authenticate(request)
+    user, token = response
+    if user is None:
+        return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
 
     # user_data.pop('password1')
     # user_data.pop('password2')
-    if 'user_category' in user_data:
-        user_data.pop('user_category')
+    # if 'user_category' in user_data:
+    #     user_data.pop('user_category')
 
-    basic_info = {'phone': user_data.get('phone'),'email': user_data.get('email')}
-    serializer = UserSerializer(data=basic_info, many=False)
-    if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(phone = user_data["phone"])
+    # basic_info = {'phone': user_data.get('phone'),'email': user_data.get('email')}
+    # serializer = UserSerializer(data=basic_info, many=False)
+    # if serializer.is_valid():
+    #     serializer.save()
+    #     user = User.objects.get(phone = user_data["phone"])
 
-        user.set_password(request.data['user_data']["password"])
-        user.save()
+    #     user.set_password(request.data['user_data']["password"])
+    #     user.save()
 
-        user_data['user'] = user
-        # pop fields not required in customer
-        user_data.pop('phone')
-        user_data.pop('email')
-        user_data.pop('password')
+    #     user_data['user'] = user
+    #     # pop fields not required in customer
+    #     user_data.pop('phone')
+    #     user_data.pop('email')
+    #     user_data.pop('password')
 
-    else:
-        return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    # else:
+    #     return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = CustomerSerializer(data=user_data, many=False)
     
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(user=user)
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
@@ -125,7 +132,7 @@ def signUpView(request):
 #         user_data.pop('user_category')
 
 #     serializer = UserSerializer(data=user_data, many=False)
-#     if serializer.is_valid():
+#     if serializer.is_valid() :
 #         serializer.save()
 #         user = User.objects.get(phone = user_data["phone"])
 
@@ -246,15 +253,34 @@ def verifyOTP(request):
         otp = str(otp)
         try:
             otp_row = OTPModel.objects.get(phone=phone)
+
         except:
             otp_row = None
         if otp_row:
             if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()): 
-                otp_row.delete() 
-                user = User.objects.get(phone=phone)
+                otp_row.delete()
+                try: 
+                    user = User.objects.get(phone=phone)
+                    if newPassword:
+                        user.set_password(newPassword)
+                        user.save()
+                        message = "Password Updated"
+                except User.DoesNotExist:
+                    if 'email' in request.data:
+                        email = request.data.get('email')
+                    else:
+                        email = None
+                    try:
+                        user = User.objects.create(phone=phone, email=email)
+                        user.set_password(request.data['password'])
+                        user.save()
+                        message = "Phone Number Verified"
+                    except Exception as e:
+                        return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
                 token = get_tokens_for_user(user)
 
-                return Response(data={"token": token, "message": "Password updated"})
+                return Response(data={"token": token, "message": message})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 

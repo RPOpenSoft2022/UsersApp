@@ -9,8 +9,8 @@ class UserManager(BaseUserManager):
 		
 		if not phone:
 			raise ValueError("Phone Number is required")
-		if not email:
-			raise ValueError("Email is required")
+		# if not email:
+		# 	raise ValueError("Email is required")
 		# if not first_name:
 		# 	raise ValueError("First name is required")
 		# if not last_name:
@@ -74,7 +74,7 @@ class User(AbstractBaseUser):
 
 	USERNAME_FIELD = 'phone'
 
-	REQUIRED_FIELDS = ['email', 'password']
+	REQUIRED_FIELDS = ['password']
 
 	objects = UserManager()
 
