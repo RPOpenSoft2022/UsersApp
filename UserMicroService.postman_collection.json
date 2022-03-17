@@ -370,18 +370,15 @@
 			"item": [
 				{
 					"name": "New Request",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
 									"key": "refresh",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY0NzM0NzYyNiwiaWF0IjoxNjQ3MjYxMjI2LCJqdGkiOiJmZTg1N2JlMTU4NmY0YjAyYjExYTNkNjE3ZjVhMWQxMiIsInBob25lIjo3MjY3MDM1NjY1fQ.T47bgq7vxUBkV6G5kd1L10hJ4PfZPAK61ALr6BKrttI",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY0NzYwOTU3MSwiaWF0IjoxNjQ3NTIzMTcxLCJqdGkiOiIyMmZkYmIwMDAzODk0NWEyOGFiYTc1YjE2ZTNmMTZhMCIsImlkIjoxOH0.vo5a3qxbBXWk6fTwkKuv7MOMbm8M3wlDtPXUL3vqqYw",
 									"type": "text"
 								}
 							]
