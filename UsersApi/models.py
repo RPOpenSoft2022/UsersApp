@@ -96,6 +96,7 @@ class Customer(models.Model):
 	FOOD_PREFERENCE = (
 		('Veg', 'Veg'),
 		('Non Veg', 'Non Veg'),
+		('Normal', 'Normal')
 	)
 
 	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
