@@ -5,7 +5,7 @@ from datetime import timedelta
 
 # Create your models here.
 class UserManager(BaseUserManager):
-	def create_user(self, phone, email, password=None):
+	def create_user(self, phone, password=None):
 		
 		if not phone:
 			raise ValueError("Phone Number is required")
@@ -17,7 +17,6 @@ class UserManager(BaseUserManager):
 		# 	raise ValueError("Last name is required")
 
 		user = self.model(
-			email = self.normalize_email(email),
 			phone = phone
 		)
 
@@ -26,9 +25,8 @@ class UserManager(BaseUserManager):
 
 		return user
 
-	def create_superuser(self, email, phone, password=None):
+	def create_superuser(self, phone, password=None):
 		user = self.create_user(
-			email = self.normalize_email(email),
 			password = password,
 			phone = phone
 		)
@@ -48,7 +46,7 @@ class User(AbstractBaseUser):
 		('Delivery', 'Delivery')
 	)
 
-	email = models.EmailField(verbose_name="Email Address", max_length=200)
+	email = models.EmailField(verbose_name="Email Address", max_length=200, null=True, blank=True)
 	# name = models.CharField(verbose_name="Name", max_length=200, blank=True)
 	# first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
 	# middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)

@@ -86,6 +86,8 @@ def signUpView(request):
     # authenitcate() verifies and decode the token
     # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
+    if response is None:
+        return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
     user, token = response
     if user is None:
         return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -235,7 +237,10 @@ def sendOTP(request):
         otp_row.delete()
     otp = random.randint(100000,999999)
     try:
-        sendMessage(phone, f'Your OTP is {otp}')
+        try:
+            sendMessage(phone, f'Your OTP is {otp}')
+        except Exception as e:
+            return Response(data={"message": "Couldn't send OTP"}, status=status.HTTP_400_BAD_REQUEST)
         newOTP = OTPModel(phone=phone, otp=otp)
         newOTP.save()
         return Response(data={"message": "OTP send"})
@@ -253,18 +258,20 @@ def verifyOTP(request):
         otp = str(otp)
         try:
             otp_row = OTPModel.objects.get(phone=phone)
-
         except:
             otp_row = None
         if otp_row:
-            if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()): 
+            if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()):
                 otp_row.delete()
+                message = "Some message"
                 try: 
                     user = User.objects.get(phone=phone)
                     if newPassword:
                         user.set_password(newPassword)
                         user.save()
                         message = "Password Updated"
+                    else:
+                        message = "Send New Password"
                 except User.DoesNotExist:
                     if 'email' in request.data:
                         email = request.data.get('email')
@@ -283,6 +290,7 @@ def verifyOTP(request):
                 return Response(data={"token": token, "message": message})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data={"message": "Please send OTP!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])

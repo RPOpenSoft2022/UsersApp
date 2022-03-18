@@ -3,8 +3,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ('id', 'email', 'last_login', 'is_admin', 'is_active',)
-    search_fields = ('email', 'phone',)
+    list_display = ('id', 'phone', 'last_login', 'is_admin', 'is_active',)
+    search_fields = ('phone',)
     readonly_fields = ('last_login',)
     filter_horizontal = ()
     list_filter = ('last_login',)
@@ -13,12 +13,12 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide'),
-            'fields': ('email', 'phone', 'password'),
+            'fields': ('phone', 'password'),
 
         }),
     )
 
-    ordering = ('email',)
+    ordering = ('id',)
 
 admin.site.register(User, UserAdmin)
 admin.site.register(OTPModel)
