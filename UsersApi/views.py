@@ -189,6 +189,7 @@ def verifyOTP(request):
 
                 if newPassword:
                     user.set_password(newPassword)
+                    user.save()
                 return Response(data={"token": token, "message": "Password updated"})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
