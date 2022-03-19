@@ -55,6 +55,16 @@
 				{
 					"name": "Signup_1",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -76,13 +86,8 @@
 									"type": "text"
 								},
 								{
-									"key": "email",
-									"value": "mohan@gmail.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "mohan123#",
+									"key": "address",
+									"value": "Someplace where lives",
 									"type": "text"
 								}
 							]
@@ -281,7 +286,7 @@
 			"name": "verify-otp",
 			"item": [
 				{
-					"name": "New Request",
+					"name": "reset password for old phone",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -306,7 +311,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/verify-otp/",
+							"raw": "http://127.0.0.1:8000/api/verify-otp/old/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -318,6 +323,52 @@
 							"path": [
 								"api",
 								"verify-otp",
+								"old",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create login credentials for new phone",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "phone",
+									"value": "7267035669",
+									"type": "text"
+								},
+								{
+									"key": "otp",
+									"value": "999999",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "something",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/verify-otp/new/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"verify-otp",
+								"new",
 								""
 							]
 						}
