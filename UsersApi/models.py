@@ -83,7 +83,7 @@ class Customer(models.Model):
 		('Normal', 'Normal')
 	)
 
-	first_name = models.CharField(verbose_name="First Name", max_length=200, null=True, blank=True)
+	first_name = models.CharField(verbose_name="First Name", max_length=200)
 	middle_name = models.CharField(verbose_name="Middle Name", max_length=200, null=True, blank=True)
 	last_name = models.CharField(verbose_name="Last Name", max_length=200, null=True, blank=True)
 	address = models.TextField(verbose_name="Address", null=True, blank=True)
@@ -93,7 +93,7 @@ class Customer(models.Model):
 	user = models.OneToOneField(User, verbose_name="User", on_delete=models.CASCADE, null=True, blank=True)
 
 	def __str__(self):
-		return self.first_name + ' ' + self.last_name 
+		return self.first_name + ' ' + (self.last_name if self.last_name else '') 
 
 	
 	
