@@ -42,79 +42,22 @@ def getUsers(request):
     serializer = UserSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
-
-@api_view(['POST'])
-def createUser(request):
-    req_fields = ['email', 'phone', 'password']
-    dict_info = request.data
-    try:
-        dict_info.pop('user_category')
-    except:
-        pass
-    
-    all_prs = True
-    for field in req_fields:
-        all_prs = all_prs and (field in dict_info)
-    if all_prs:
-        try:
-            user = User.objects.get(phone=request.data.get('phone'))
-        except:
-            user = None
-        if user:
-            return Response({"message": "A user with this phone already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User(**dict_info)
-            user.set_password(request.data.get('password'))
-            user.save()
-            response = Response()
-            response.data = {
-                'message': 'User created, now you can login',
-            }
-            return response
-        except:
-            return Response(data={"message": "user not created"}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response(data={"message": "required fields not present"}, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def signUpView(request):
     user_data = request.data
     JWT_authenticator = JWTAuthentication()
 
-    # authenitcate() verifies and decode the token
+    # authenticate() verifies and decode the token
     # if token is invalid, it raises an exception and returns 401
-    response = JWT_authenticator.authenticate(request)
-    if response is None:
+    try:
+        response = JWT_authenticator.authenticate(request)
+        user, token = response
+    except:
         return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
-    user, token = response
-    if user is None:
-        return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # user_data.pop('password1')
-    # user_data.pop('password2')
-    # if 'user_category' in user_data:
-    #     user_data.pop('user_category')
-
-    # basic_info = {'phone': user_data.get('phone'),'email': user_data.get('email')}
-    # serializer = UserSerializer(data=basic_info, many=False)
-    # if serializer.is_valid():
-    #     serializer.save()
-    #     user = User.objects.get(phone = user_data["phone"])
-
-    #     user.set_password(request.data['user_data']["password"])
-    #     user.save()
-
-    #     user_data['user'] = user
-    #     # pop fields not required in customer
-    #     user_data.pop('phone')
-    #     user_data.pop('email')
-    #     user_data.pop('password')
-
-    # else:
-    #     return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    if user.customer:
+        return Response(data={"message":"User with this phone number already exists"})
 
     serializer = CustomerSerializer(data=user_data, many=False)
     
@@ -123,35 +66,6 @@ def signUpView(request):
         return Response({'messsge':'Successfully Signed Up! Head over to login'})
     else:
         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['POST'])
-# def signUpView(request):
-#     user_data = request.data['user_data']
-#     customer_data = request.data['customer_data']
-
-#     # user_data.pop('password1')
-#     # user_data.pop('password2')
-#     if 'user_category' in user_data:
-#         user_data.pop('user_category')
-
-#     serializer = UserSerializer(data=user_data, many=False)
-#     if serializer.is_valid() :
-#         serializer.save()
-#         user = User.objects.get(phone = user_data["phone"])
-
-#         if user_data["password1"] != user_data["password2"]:
-#             return Response({"message":"Passwords didn't match"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user.set_password(request.data['user_data']["password1"])
-#         user.save()
-#     else:
-#         return Response(data={"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-#     serializer = CustomerSerializer(data=customer_data, many=False)
-#     if serializer.is_valid():
-#         serializer.save(user=user)
-#         return Response({'messsge':'Successfully Signed Up! Head over to login'})
-#     else:
-#         return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -216,8 +130,6 @@ def updateUser(request, pk):
     try:
         for attr, value in dict_info.items(): 
             setattr(user, attr, value)
-        # if dict_info.get('password'):
-        #     user.set_password(dict_info.get('password'))
         user.save()
         return Response(data={"message": "user updated"})
     except:
@@ -253,7 +165,8 @@ def sendOTP(request):
 def verifyOTP(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-    newPassword = request.data.get('new-password')
+    newPassword = request.data.get('newPassword')
+    print(newPassword)
     if phone and otp:
         phone = int(phone)
         otp = str(otp)
@@ -274,15 +187,11 @@ def verifyOTP(request):
                     else:
                         message = "Send New Password"
                 except User.DoesNotExist:
-                    if 'email' in request.data:
-                        email = request.data.get('email')
-                    else:
-                        email = None
                     try:
-                        user = User.objects.create(phone=phone, email=email)
-                        user.set_password(request.data['password'])
+                        user = User.objects.create(phone=phone)
+                        user.set_password(newPassword)
                         user.save()
-                        message = "Phone Number Verified"
+                        message = "Login credentials created"
                     except Exception as e:
                         return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -291,7 +200,7 @@ def verifyOTP(request):
                 return Response(data={"token": token, "message": message})
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(data={"message": "Please send OTP!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message": "First generate OTP!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
@@ -300,9 +209,7 @@ def addEmployee(request, pk):
         return Response(data={"message": "Invalid User Category!"}, status=status.HTTP_400_BAD_REQUEST)
         
     sheet = request.FILES['sheet']
-    print(sheet)
     df = pd.read_csv(sheet)
-    print(df.head())
     for index, row in df.iterrows():
         print(row["phone"])
         user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
