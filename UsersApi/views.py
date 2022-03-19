@@ -79,6 +79,7 @@ def createUser(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def signUpView(request):
     user_data = request.data
     JWT_authenticator = JWTAuthentication()
