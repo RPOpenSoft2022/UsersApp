@@ -165,11 +165,10 @@ def sendOTP(request):
 
 
 @api_view(['POST'])
-def verifyOTP(request):
+def verifyOTP(request, type):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
     newPassword = request.data.get('newPassword')
-    print(newPassword)
     if phone and otp:
         phone = int(phone)
         otp = str(otp)
@@ -191,8 +190,11 @@ def verifyOTP(request):
                         message = "Send New Password"
                         return Response({"message": message}, status=status.HTTP_400_BAD_REQUEST)
                 except User.DoesNotExist:
+                    if type != 'new':
+                        return Response(data={"message":"User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+                    email = request.data.get('email')
                     try:
-                        user = User.objects.create(phone=phone)
+                        user = User.objects.create(phone=phone, email=email)
                         user.set_password(newPassword)
                         user.save()
                         message = "Login credentials created"
