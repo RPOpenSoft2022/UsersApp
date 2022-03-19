@@ -1,7 +1,3 @@
-from os import stat
-from pstats import Stats
-from django.shortcuts import render
-from django.http import JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -12,12 +8,10 @@ from .models import OTPModel
 from .serializers import *
 from rest_framework.views import APIView
 from .models import User, UserManager
-from datetime import date, datetime
-import jwt
+from datetime import date, datetime, timedelta
 from rest_framework.pagination import PageNumberPagination
-from datetime import timedelta
 from django.utils import timezone
-from .utilities import sendMessage, get_distance
+from .utilities import sendMessage
 import random
 from rest_framework_simplejwt.tokens import RefreshToken
 import pandas as pd
@@ -82,7 +76,7 @@ def deleteUser(request, pk):
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = User.objects.get(phone=pk)
+        user = User.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,11 +97,14 @@ def getUser(request, pk):
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
-        user = User.objects.get(phone=pk)
+        user = User.objects.get(id=pk)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = UserSerializer(user)
+
+    if user.user_category == 'Customer':
+        return Response({**serializer.data, **CustomerSerializer(user.customer).data})
 
     return Response(serializer.data)
 
@@ -123,7 +120,7 @@ def updateUser(request, pk):
     user, token = response
     if user.id != pk:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    dict_info = request.data
+    dict_info = request.data.copy()
 
     try:
         dict_info.pop('password')
@@ -131,8 +128,15 @@ def updateUser(request, pk):
         pass
 
     try:
-        for attr, value in dict_info.items(): 
-            setattr(user, attr, value)
+        if dict_info.get('phone'):
+            setattr(user, 'phone', dict_info.pop('phone'))
+        if dict_info.get('email'):
+            setattr(user, 'email', dict_info.pop('email'))
+
+        if user.user_category == 'Customer':    
+            for attr, value in dict_info.items(): 
+                setattr(user.customer, attr, value)
+            user.customer.save()
         user.save()
         return Response(data={"message": "user updated"})
     except:
@@ -169,7 +173,7 @@ def verifyOTP(request, type):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
     newPassword = request.data.get('newPassword')
-    if phone and otp:
+    if phone and otp and newPassword:
         phone = int(phone)
         otp = str(otp)
         try:
@@ -218,7 +222,6 @@ def addEmployee(request, pk):
     sheet = request.FILES['sheet']
     df = pd.read_csv(sheet)
     for index, row in df.iterrows():
-        print(row["phone"])
         user = User.objects.create(phone=row["phone"], email=row["email"], user_category = pk)
         user.set_password(row["password"])
         user.save()

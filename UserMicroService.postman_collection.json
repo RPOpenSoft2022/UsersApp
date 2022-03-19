@@ -18,12 +18,12 @@
 							"urlencoded": [
 								{
 									"key": "phone",
-									"value": "7267035665",
+									"value": "7267035663",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "hello123#",
+									"value": "cusomter_1#",
 									"type": "text"
 								}
 							]
@@ -57,8 +57,38 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "first_name",
+									"value": "Mohan",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Das",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "7267035661",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "mohan@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "mohan123#",
+									"type": "text"
+								}
+							]
+						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/signup/?first_name=Someone&last_name=something&phone=7267035665&password=airan123%23&email=airan@gmail.com",
+							"raw": "http://127.0.0.1:8000/api/signup/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -74,24 +104,24 @@
 							],
 							"query": [
 								{
-									"key": "first_name",
-									"value": "Someone"
+									"key": "",
+									"value": "",
+									"disabled": true
 								},
 								{
-									"key": "last_name",
-									"value": "something"
+									"key": "",
+									"value": "",
+									"disabled": true
 								},
 								{
-									"key": "phone",
-									"value": "7267035665"
+									"key": "",
+									"value": "",
+									"disabled": true
 								},
 								{
-									"key": "password",
-									"value": "airan123%23"
-								},
-								{
-									"key": "email",
-									"value": "airan@gmail.com"
+									"key": "",
+									"value": "",
+									"disabled": true
 								}
 							]
 						}
@@ -111,7 +141,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3MjU3NjA3LCJpYXQiOjE2NDcyNTU4MDcsImp0aSI6IjEwNmJmYjdhZjQyMDRjZmFiOGZjNmEwZjlmN2VlMDAyIiwicGhvbmUiOjcyNjcwMzU2NjZ9.oJkvnxDGW80w9slgGJca0iSuwIvzte4vsEpUsW8m4XI",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTA0MDM2LCJpYXQiOjE2NDc1MDIyMzYsImp0aSI6ImM4ZTdjNzQzMDYwZjQxNTA5YTQ0YzU1ZjJlZWRmYTVkIiwiaWQiOjE4fQ.Rb-LvpS-bZZw0NM-kgh_s77dGDorsKjx_PmaJkD9w_k",
 									"type": "string"
 								}
 							]
@@ -119,7 +149,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/get-user/1/",
+							"raw": "http://127.0.0.1:8000/api/get-user/18/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -131,7 +161,7 @@
 							"path": [
 								"api",
 								"get-user",
-								"1",
+								"18",
 								""
 							]
 						}
@@ -145,33 +175,30 @@
 			"item": [
 				{
 					"name": "update_1",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3MjU4NDcyLCJpYXQiOjE2NDcyNTY2NzIsImp0aSI6IjNkZjYxYWNmZjAxNjQwZjRhNTlmNTE0MzQyOGUxOGUwIiwicGhvbmUiOjcyNjcwMzU2NjV9.QbvqG8QhUnAkfKSRFOAKjocvL2eLOakBSwxiBaO47WQ",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTA0MDM2LCJpYXQiOjE2NDc1MDIyMzYsImp0aSI6ImM4ZTdjNzQzMDYwZjQxNTA5YTQ0YzU1ZjJlZWRmYTVkIiwiaWQiOjE4fQ.Rb-LvpS-bZZw0NM-kgh_s77dGDorsKjx_PmaJkD9w_k",
 									"type": "string"
 								}
 							]
 						},
-						"method": "GET",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
 									"key": "first_name",
-									"value": "something",
+									"value": "updated_first",
 									"type": "text"
 								},
 								{
 									"key": "last_name",
-									"value": "something",
+									"value": "something_updated",
 									"type": "text"
 								},
 								{
@@ -183,7 +210,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/update-user/1/",
+							"raw": "http://127.0.0.1:8000/api/update-user/18/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -195,7 +222,7 @@
 							"path": [
 								"api",
 								"update-user",
-								"1",
+								"18",
 								""
 							]
 						}
@@ -272,8 +299,8 @@
 									"type": "text"
 								},
 								{
-									"key": "new-password",
-									"value": "somepassword",
+									"key": "newPassword",
+									"value": "somepassword123#",
 									"type": "text"
 								}
 							]
@@ -343,18 +370,15 @@
 			"item": [
 				{
 					"name": "New Request",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
 									"key": "refresh",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY0NzM0NzYyNiwiaWF0IjoxNjQ3MjYxMjI2LCJqdGkiOiJmZTg1N2JlMTU4NmY0YjAyYjExYTNkNjE3ZjVhMWQxMiIsInBob25lIjo3MjY3MDM1NjY1fQ.T47bgq7vxUBkV6G5kd1L10hJ4PfZPAK61ALr6BKrttI",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY0NzYwOTU3MSwiaWF0IjoxNjQ3NTIzMTcxLCJqdGkiOiIyMmZkYmIwMDAzODk0NWEyOGFiYTc1YjE2ZTNmMTZhMCIsImlkIjoxOH0.vo5a3qxbBXWk6fTwkKuv7MOMbm8M3wlDtPXUL3vqqYw",
 									"type": "text"
 								}
 							]
@@ -381,6 +405,97 @@
 									"value": "",
 									"disabled": true
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "add_employees",
+			"item": [
+				{
+					"name": "add_staff",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/home/shobhit/Downloads/Staff_sheet.xlsx"
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/add/Staff/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"add",
+								"Staff",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add_delivery",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "sheet",
+									"type": "file",
+									"src": "/home/shobhit/Downloads/Delivery_sheet - Sheet1.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/add/Delivery/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"add",
+								"Delivery",
+								""
 							]
 						}
 					},
