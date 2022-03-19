@@ -56,8 +56,11 @@ def signUpView(request):
     except:
         return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
 
-    if user.customer:
+    try:
+        customer = user.customer
         return Response(data={"message":"User with this phone number already exists"})
+    except:
+        pass
 
     serializer = CustomerSerializer(data=user_data, many=False)
     
@@ -156,9 +159,9 @@ def sendOTP(request):
             return Response(data={"message": "Couldn't send OTP"}, status=status.HTTP_400_BAD_REQUEST)
         newOTP = OTPModel(phone=phone, otp=otp)
         newOTP.save()
-        return Response(data={"message": "OTP send"})
+        return Response(data={"message": "OTP sent"})
     except:
-        return Response(data={"message":"OTP not send"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message":"OTP not sent"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -186,6 +189,7 @@ def verifyOTP(request):
                         message = "Password Updated"
                     else:
                         message = "Send New Password"
+                        return Response({"message": message}, status=status.HTTP_400_BAD_REQUEST)
                 except User.DoesNotExist:
                     try:
                         user = User.objects.create(phone=phone)
@@ -201,6 +205,7 @@ def verifyOTP(request):
 
             return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(data={"message": "First generate OTP!"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"message":"Phone and OTP required!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
