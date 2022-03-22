@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,11 +27,13 @@ SECRET_KEY = 'django-insecure--&l&@&=367*&9v_agoyln$dk&*4(u$a-7orvvr@^scp8^62cs*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+ORDERS_MICROSERVICE_URL = os.getenv('ORDERS_MICROSERVICE_URL')
+STORES_MICROSERVICE_URL = os.getenv('STORES_MICROSERVICE_URL')
+DELIVERY_MICROSERVICE_URL = os.getenv('DELIVERY_MICROSERVICE_URL')
+
 ALLOWED_HOSTS = []
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
