@@ -18,12 +18,12 @@
 							"urlencoded": [
 								{
 									"key": "phone",
-									"value": "7267035663",
+									"value": "7267035661",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "cusomter_1#",
+									"value": "mypassword",
 									"type": "text"
 								}
 							]
@@ -50,20 +50,13 @@
 			]
 		},
 		{
-			"name": "Signup",
+			"name": "register",
 			"item": [
 				{
-					"name": "Signup_1",
+					"name": "register_1",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTE4MTU4LCJpYXQiOjE2NDc1MTYzNTgsImp0aSI6ImUxNjU3MTQ4NzVhMjQ4ZjlhNzRlYzAwOGI2ZWNmY2QxIiwiaWQiOjExfQ.KlCql3Ytv7d5yQ12uyzXM73eBMgRaOLu-2R-OxyrqQo",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
@@ -71,29 +64,25 @@
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
-									"key": "first_name",
-									"value": "Mohan",
-									"type": "text"
-								},
-								{
-									"key": "last_name",
-									"value": "Das",
-									"type": "text"
-								},
-								{
 									"key": "phone",
 									"value": "7267035661",
 									"type": "text"
 								},
 								{
-									"key": "address",
-									"value": "Someplace where lives",
+									"key": "otp",
+									"value": "456823",
+									"description": "valid for 2 minutes",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "mypassword",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/signup/",
+							"raw": "http://127.0.0.1:8000/api/register/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -104,7 +93,7 @@
 							"port": "8000",
 							"path": [
 								"api",
-								"signup",
+								"register",
 								""
 							],
 							"query": [
@@ -146,7 +135,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTA0MDM2LCJpYXQiOjE2NDc1MDIyMzYsImp0aSI6ImM4ZTdjNzQzMDYwZjQxNTA5YTQ0YzU1ZjJlZWRmYTVkIiwiaWQiOjE4fQ.Rb-LvpS-bZZw0NM-kgh_s77dGDorsKjx_PmaJkD9w_k",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ4MDE3NTYwLCJpYXQiOjE2NDgwMTU3NjAsImp0aSI6ImMxZTBkMDk5MmI4YTRlZmI5OGU5MGY2ODljYjU5MTViIiwiaWQiOjExfQ.4SBpEoW_-k7oVczIMwbNCzh2mYaV33t6RTV_vjHZlxs",
 									"type": "string"
 								}
 							]
@@ -154,7 +143,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/get-user/18/",
+							"raw": "http://127.0.0.1:8000/api/get-user/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -166,7 +155,6 @@
 							"path": [
 								"api",
 								"get-user",
-								"18",
 								""
 							]
 						}
@@ -186,7 +174,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ3NTA0MDM2LCJpYXQiOjE2NDc1MDIyMzYsImp0aSI6ImM4ZTdjNzQzMDYwZjQxNTA5YTQ0YzU1ZjJlZWRmYTVkIiwiaWQiOjE4fQ.Rb-LvpS-bZZw0NM-kgh_s77dGDorsKjx_PmaJkD9w_k",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ4MDE5NjkzLCJpYXQiOjE2NDgwMTc4OTMsImp0aSI6ImJhOWJiOGM4ZWU2ZjRkZTg5NTQ3MjkzMTk5ZGU3MDFjIiwiaWQiOjEzfQ.CNz9u4GN5Nov0ooReboCA4aOSZM3ht7tqHU7-fAhdkw",
 									"type": "string"
 								}
 							]
@@ -198,24 +186,24 @@
 							"urlencoded": [
 								{
 									"key": "first_name",
-									"value": "updated_first",
+									"value": "first_name",
+									"description": "required when creating customer for first time",
 									"type": "text"
 								},
 								{
 									"key": "last_name",
-									"value": "something_updated",
+									"value": "updated_last",
 									"type": "text"
 								},
 								{
-									"key": "",
-									"value": "",
-									"type": "text",
-									"disabled": true
+									"key": "email",
+									"value": "email@gmail.com",
+									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/update-user/18/",
+							"raw": "http://127.0.0.1:8000/api/update-user/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -227,7 +215,6 @@
 							"path": [
 								"api",
 								"update-user",
-								"18",
 								""
 							]
 						}
@@ -283,10 +270,10 @@
 			]
 		},
 		{
-			"name": "verify-otp",
+			"name": "reset-password",
 			"item": [
 				{
-					"name": "reset password for old phone",
+					"name": "reset_1",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -295,23 +282,24 @@
 							"urlencoded": [
 								{
 									"key": "phone",
-									"value": "7267035660",
+									"value": "7267035661",
 									"type": "text"
 								},
 								{
 									"key": "otp",
 									"value": "779253",
+									"description": "valid for 2minutes",
 									"type": "text"
 								},
 								{
-									"key": "newPassword",
+									"key": "new_password",
 									"value": "somepassword123#",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/verify-otp/old/",
+							"raw": "http://127.0.0.1:8000/api/reset-password/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -322,53 +310,7 @@
 							"port": "8000",
 							"path": [
 								"api",
-								"verify-otp",
-								"old",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create login credentials for new phone",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "phone",
-									"value": "7267035669",
-									"type": "text"
-								},
-								{
-									"key": "otp",
-									"value": "999999",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "something",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://127.0.0.1:8000/api/verify-otp/new/",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "8000",
-							"path": [
-								"api",
-								"verify-otp",
-								"new",
+								"reset-password",
 								""
 							]
 						}
@@ -546,6 +488,45 @@
 								"api",
 								"add",
 								"Delivery",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "delete-user",
+			"item": [
+				{
+					"name": "delete_1",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ4MDE4MjkyLCJpYXQiOjE2NDgwMTY0OTIsImp0aSI6Ijk0MGZlZDdiNWFkNDQ2YTdhY2VlYjM1YWZiYmQwNWJlIiwiaWQiOjExfQ.DkZqBdiwVQtVYGULcUd-4y4cnll3C_970bdmazsx0I8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/del-user/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"del-user",
 								""
 							]
 						}
