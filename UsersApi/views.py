@@ -1,3 +1,4 @@
+from email import message
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -37,110 +38,96 @@ def getUsers(request):
     return paginator.get_paginated_response(serializer.data)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def signUpView(request):
-    user_data = request.data
-    JWT_authenticator = JWTAuthentication()
-
-    # authenticate() verifies and decode the token
-    # if token is invalid, it raises an exception and returns 401
-    try:
-        response = JWT_authenticator.authenticate(request)
-        user, token = response
-    except:
-        return Response(data={"message": "Your phone number is not verified!"}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        customer = user.customer
-        return Response(data={"message":"User with this phone number already exists"})
-    except:
-        pass
-
-    serializer = CustomerSerializer(data=user_data, many=False)
-    
-    if serializer.is_valid():
-        serializer.save(user=user)
-        return Response({'messsge':'Successfully Signed Up! Head over to login'})
-    else:
-        return Response(data={"message": serializer.error_message()}, status=status.HTTP_400_BAD_REQUEST)
+def register(request):
+    phone = request.data.get('phone')
+    otp = request.data.get('otp')
+    password = request.data.get('password')
+    if phone and otp and password:
+        user = User.objects.filter(phone=phone).first()
+        if user:
+            return Response(data={"message":"User with this phone already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        phone = int(phone)
+        otp = str(otp)
+        otp_row = OTPModel.objects.filter(phone=phone).first()
+        if otp_row:
+            if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()):
+                otp_row.delete()
+                try:
+                    user = User.objects.create(phone=phone)
+                    user.set_password(password)
+                    user.save()
+                    token = get_tokens_for_user(user)
+                    return Response(data={**token, "message": "User is registered."})
+                except Exception as e:
+                    return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"message":"OTP is invalid."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(data={"message":"Generate OTP first!"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    return Response(data={"message":"Required fields not present"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def deleteUser(request, pk):
+def deleteUser(request):
     JWT_authenticator = JWTAuthentication()
-
-    # authenitcate() verifies and decode the token
-    # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.id != pk:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    try:
-        user = User.objects.get(id=pk)
-    except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
     user.delete()
-
-    return Response({'message': 'User data deleted'})
+    return Response({'message': 'User deleted'})
 
 # accept id of User table
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def getUser(request, pk):
+def getUser(request):
     JWT_authenticator = JWTAuthentication()
-
-    # authenitcate() verifies and decode the token
-    # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.id != pk:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-    try:
-        user = User.objects.get(id=pk)
-    except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = UserSerializer(user)
 
-    if user.user_category == 'Customer':
-        return Response({**serializer.data, **CustomerSerializer(user.customer).data})
+    try:
+        customer = user.customer
+    except:
+        customer = None
+    if user.user_category == 'Customer' and customer:
+        return Response({**serializer.data, **CustomerSerializer(customer).data})
 
     return Response(serializer.data)
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def updateUser(request, pk):
+def updateUser(request):
     JWT_authenticator = JWTAuthentication()
-
-    # authenitcate() verifies and decode the token
-    # if token is invalid, it raises an exception and returns 401
     response = JWT_authenticator.authenticate(request)
     user, token = response
-    if user.id != pk:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
     dict_info = request.data.copy()
 
     try:
         dict_info.pop('password')
     except:
         pass
-
+   
     try:
         if dict_info.get('phone'):
-            setattr(user, 'phone', dict_info.pop('phone'))
+            setattr(user, 'phone', dict_info.get('phone'))
+    
         if dict_info.get('email'):
-            setattr(user, 'email', dict_info.pop('email'))
+            setattr(user, 'email', dict_info.get('email'))
 
-        if user.user_category == 'Customer':    
-            for attr, value in dict_info.items(): 
-                setattr(user.customer, attr, value)
-            user.customer.save()
-        user.save()
-        return Response(data={"message": "user updated"})
-    except:
-        return Response(data={"message":"user not updated"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = CustomerSerializer(instance=user.customer, data=dict_info, many=False)
+        except:
+            serializer = CustomerSerializer(data=dict_info, many=False)
+    
+        if serializer.is_valid():
+            serializer.save(user=user)
+            user.save()
+            return Response({'message':'User info saved'})
+        return Response(data={"message":str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response(data={"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def sendOTP(request):
@@ -169,49 +156,30 @@ def sendOTP(request):
 
 
 @api_view(['POST'])
-def verifyOTP(request, type):
+def resetPassword(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
-    newPassword = request.data.get('newPassword')
-    if phone and otp and newPassword:
+    new_password = request.data.get('new_password')
+    if phone and otp and new_password:
         phone = int(phone)
         otp = str(otp)
-        try:
-            otp_row = OTPModel.objects.get(phone=phone)
-        except:
-            otp_row = None
+        otp_row = OTPModel.objects.filter(phone=phone).first()
         if otp_row:
             if (otp_row.otp == otp) and (otp_row.valid_until > timezone.now()):
                 otp_row.delete()
-                message = "Some message"
                 try: 
                     user = User.objects.get(phone=phone)
-                    if newPassword:
-                        user.set_password(newPassword)
-                        user.save()
-                        message = "Password Updated"
-                    else:
-                        message = "Send New Password"
-                        return Response({"message": message}, status=status.HTTP_400_BAD_REQUEST)
+                    user.set_password(new_password)
+                    user.save()
                 except User.DoesNotExist:
-                    if type != 'new':
-                        return Response(data={"message":"User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-                    email = request.data.get('email')
-                    try:
-                        user = User.objects.create(phone=phone, email=email)
-                        user.set_password(newPassword)
-                        user.save()
-                        message = "Login credentials created"
-                    except Exception as e:
-                        return Response({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(data={"message":"User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
                 token = get_tokens_for_user(user)
+                return Response(data={**token, "message": "Password Updated"})
 
-                return Response(data={"token": token, "message": message})
-
-            return Response(data={"message": "OTP invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data={"message": "OTP invalid!"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(data={"message": "First generate OTP!"}, status=status.HTTP_400_BAD_REQUEST)
-    return Response({"message":"Phone and OTP required!"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"message":"Required fields not present!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])

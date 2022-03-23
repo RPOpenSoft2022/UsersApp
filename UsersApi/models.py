@@ -46,8 +46,8 @@ class User(AbstractBaseUser):
 		('Delivery', 'Delivery')
 	)
 
-	email = models.EmailField(verbose_name="Email Address", max_length=200, null=True, blank=True)
 	phone = models.BigIntegerField(verbose_name="Contact Number", unique=True, null=True)
+	email = models.EmailField(verbose_name="Email Address", max_length=200, null=True, blank=True)
 	user_category = models.CharField(verbose_name="User Category", choices=USER_CATEGORY, default='Customer', max_length=200)
 	is_admin = models.BooleanField(default=False)
 	is_active = models.BooleanField(default=True)
@@ -72,7 +72,7 @@ class OTPModel(models.Model):
     phone = models.BigIntegerField()
     otp = models.CharField(max_length=6, verbose_name=" Verification Code ")
     valid_until = models.DateTimeField(
-        default=timezone.now() + timedelta(seconds=300),
+        default=timezone.now() + timedelta(seconds=120),
         help_text="The timestamp of the moment of expiry of the saved token."
     )
 
