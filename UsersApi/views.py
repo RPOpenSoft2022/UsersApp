@@ -142,7 +142,7 @@ def sendOTP(request):
         if otp_row.valid_until > timezone.now():
             return Response(data={"message": "OTP already sent"})
         otp_row.delete()
-    otp = random.randint(100000,999999)
+    otp = random.randint(1000,9999)
     try:
         try:
             sendMessage(phone, f'Your OTP is {otp}')
