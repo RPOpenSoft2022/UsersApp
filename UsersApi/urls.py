@@ -19,6 +19,6 @@ urlpatterns = [
 	path('logout/', views.BlacklistRefreshView.as_view(), name="logout"),
 	path('register/', views.register, name="register"),
 	path('add/<str:pk>/', views.addEmployee, name="addEmployees"),
-	path('get_closest_delivery_partner', views.closestDeliveryPartner, name='get_closest_delivery_partner'),
-	path('usershistory', views.usershistory, name="usersHistory"),
+	path('delivery_partner/', views.closestDeliveryPartner, name='get_closest_delivery_partner'),
+	path('usershistory/', views.usershistory, name="usersHistory"),
 ]
