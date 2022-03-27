@@ -1,4 +1,5 @@
 from email import message
+from django.http import JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -194,3 +195,10 @@ def addEmployee(request, pk):
         user.set_password(row["password"])
         user.save()
     return Response({"message": f"Added {pk} data succesfully!"})
+
+
+@api_view(['POST'])
+def closestDeliveryPartner(request):
+    location = request.data['pickup_location']
+    print(location)
+    return JsonResponse({"loc": location, "partner_user_id": 1})
