@@ -19,5 +19,5 @@ urlpatterns = [
 	path('logout/', views.BlacklistRefreshView.as_view(), name="logout"),
 	path('register/', views.register, name="register"),
 	path('add/<str:pk>/', views.addEmployee, name="addEmployees"),
-
+	path('usershistory', views.usershistory, name="usersHistory"),
 ]

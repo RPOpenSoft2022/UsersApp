@@ -17,6 +17,8 @@ import random
 from rest_framework_simplejwt.tokens import RefreshToken
 import pandas as pd
 
+month_code=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "sep", "Oct", "Nov", "Dec"]
+
 class BlacklistRefreshView(APIView):
     def post(self, request):
         token = RefreshToken(request.data.get('refresh'))
@@ -194,3 +196,24 @@ def addEmployee(request, pk):
         user.set_password(row["password"])
         user.save()
     return Response({"message": f"Added {pk} data succesfully!"})
+
+
+@api_view(["GET"])
+def usershistory(request):
+    i=1
+    response = {}
+    currentMonth = datetime.now().month
+    currentYear = datetime.now().year
+    while i<13:
+        totalusers=0
+        users=User.objects.filter(created_at__year=currentYear,created_at__month=currentMonth)
+        for user in users:
+            totalusers=totalusers+1
+        response[month_code[currentMonth-1]] = totalusers
+        currentMonth=currentMonth-1
+        if (currentMonth==0):
+            currentMonth=12
+            currentYear=currentYear-1
+        i=i+1
+    return Response(response)
+
