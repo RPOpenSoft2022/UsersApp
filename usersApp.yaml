@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usersapp
+  labels:
+    app: usersapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: usersapp
+  template:
+    metadata:
+      labels:
+        app: usersapp
+    spec:
+      containers:
+      - name: users-app
+        # Replace  with your project ID or use `make template`
+        image: gcr.io/rpopensoft2022/usersapp
+        # This setting makes nodes pull the docker image every time before
+        # starting the pod. This is useful when debugging, but should be turned
+        # off in production.
+        imagePullPolicy: Always
+        env:
+            # [START cloudsql_secrets]
+            - name: DATABASE_NAME
+              value: users-database
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql
+                  key: password
+            # [END cloudsql_secrets]
+        ports:
+        - containerPort: 8080
+
+      # [START proxy_container]
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.16
+        name: cloudsql-proxy
+        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                  "-instances=rpopensoft2022:asia-south1:anytime-db=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-oauth-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+          - name: ssl-certs
+            mountPath: /etc/ssl/certs
+          - name: cloudsql
+            mountPath: /cloudsql
+      # [END proxy_container] 
+      # [START volumes]
+      volumes:
+        - name: cloudsql-oauth-credentials
+          secret:
+            secretName: cloudsql-oauth-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir: {}
+      # [END volumes]        
+# [END kubernetes_deployment]
+
+---
+
+# [START service]
+# The polls service provides a load-balancing proxy over the polls app
+# pods. By specifying the type as a 'LoadBalancer', Kubernetes Engine will
+# create an external HTTP load balancer.
+# For more information about Services see:
+#   https://kubernetes.io/docs/concepts/services-networking/service/
+# For more information about external HTTP load balancing see:
+#   https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+apiVersion: v1
+kind: Service
+metadata:
+  name: usersapp
+  labels:
+    app: usersapp
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: usersapp
+# [END service]

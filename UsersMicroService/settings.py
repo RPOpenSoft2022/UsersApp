@@ -28,12 +28,13 @@ SECRET_KEY = 'django-insecure--&l&@&=367*&9v_agoyln$dk&*4(u$a-7orvvr@^scp8^62cs*
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 
 # URLS for the microservices
 ORDERS_MICROSERVICE_URL = os.getenv('ORDERS_MICROSERVICE_URL')
 STORES_MICROSERVICE_URL = os.getenv('STORES_MICROSERVICE_URL')
 USERS_MICROSERVICE_URL = os.getenv('USERS_MICROSERVICE_URL')
-DELIVERY_MICROSERVICE_URL = os.getenv('USERS_MICROSERVICE_URL')
+DELIVERY_MICROSERVICE_URL = os.getenv('DELIVERY_MICROSERVICE_URL')
 
 # Application definition
 
@@ -122,8 +123,12 @@ WSGI_APPLICATION = 'UsersMicroService.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
