@@ -151,7 +151,7 @@ def sendOTP(request):
         try:
             sendMessage(phone, f'Your OTP is {otp}')
         except Exception as e:
-            return Response(data={"message": "Couldn't send OTP"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         newOTP = OTPModel(phone=phone, otp=otp, valid_until=(timezone.now() + timedelta(seconds=120)))
         newOTP.save()
         return Response(data={"message": "OTP sent"})
