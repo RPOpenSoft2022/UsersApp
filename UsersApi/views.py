@@ -109,6 +109,7 @@ def updateUser(request):
 
     try:
         dict_info.pop('password')
+        dict_info.pop('user_category')
     except:
         pass
    
