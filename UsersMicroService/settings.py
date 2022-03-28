@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -28,6 +29,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# URLS for the microservices
+ORDERS_MICROSERVICE_URL = os.getenv('ORDERS_MICROSERVICE_URL')
+STORES_MICROSERVICE_URL = os.getenv('STORES_MICROSERVICE_URL')
+USERS_MICROSERVICE_URL = os.getenv('USERS_MICROSERVICE_URL')
+DELIVERY_MICROSERVICE_URL = os.getenv('USERS_MICROSERVICE_URL')
 
 # Application definition
 

@@ -106,6 +106,7 @@ def updateUser(request):
 
     try:
         dict_info.pop('password')
+        dict_info.pop('user_category')
     except:
         pass
    
@@ -148,6 +149,7 @@ def sendOTP(request):
             sendMessage(phone, f'Your OTP is {otp}')
         except Exception as e:
             return Response(data={"message": "Couldn't send OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
         newOTP = OTPModel(phone=phone, otp=otp)
         newOTP.save()
         return Response(data={"message": "OTP sent"})
