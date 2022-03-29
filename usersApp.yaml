@@ -26,6 +26,14 @@ spec:
             # [START cloudsql_secrets]
             - name: DATABASE_NAME
               value: users-database
+            - name: ORDERS_MICROSERVICE_URL
+              value: "http://ordersapp:80"
+            - name: STORES_MICROSERVICE_URL
+              value: "http://storesapp:80"
+            - name: USERS_MICROSERVICE_URL
+              value: "http://usersapp:80"
+            - name: DELIVERY_MICROSERVICE_URL
+              value: "http://deliveryapp:80"
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
@@ -85,7 +93,6 @@ metadata:
   labels:
     app: usersapp
 spec:
-  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 8080
