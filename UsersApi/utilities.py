@@ -8,4 +8,4 @@ def sendMessage(phone, message):
     message = client.messages.create(
         body=message,
         from_=settings.SENDER_PHONE,
-        to='+91'+phone)
+        to='+91'+str(phone))
