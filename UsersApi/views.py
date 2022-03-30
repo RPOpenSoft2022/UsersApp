@@ -200,17 +200,10 @@ def addEmployee(request, pk):
     return Response({"message": f"Added {pk} data succesfully!"})
 
 
-@api_view(['POST'])
-def closestDeliveryPartner(request):
-    location = request.data['pickup_location']
-    print(location)
-    return JsonResponse({"loc": location, "partner_user_id": 1})
-
-
 @api_view(["GET"])
 def usershistory(request):
     i=1
-    response = {}
+    history = {}
     currentMonth = datetime.now().month
     currentYear = datetime.now().year
     while i<13:
@@ -218,11 +211,19 @@ def usershistory(request):
         users=User.objects.filter(created_at__year=currentYear,created_at__month=currentMonth)
         for user in users:
             totalusers=totalusers+1
-        response[month_code[currentMonth-1]] = totalusers
+        history[month_code[currentMonth-1]] = totalusers
         currentMonth=currentMonth-1
         if (currentMonth==0):
             currentMonth=12
             currentYear=currentYear-1
         i=i+1
-    return Response(response)
+    customers = User.objects.filter(user_category="Customer").count()
+    staff = User.objects.filter(user_category="Staff").count()
+    delivery = User.objects.filter(user_category="Delivery").count()
+    return Response({
+        "customer": customers,
+        "staff": staff,
+        "delivery": delivery,
+        "history": history
+    }, status=status.HTTP_200_OK)
 
