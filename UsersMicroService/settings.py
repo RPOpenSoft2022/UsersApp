@@ -123,14 +123,14 @@ WSGI_APPLICATION = 'UsersMicroService.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.postgresql',
-        # 'NAME': os.getenv('DATABASE_NAME'),
-        # 'USER': os.getenv('DATABASE_USER'),
-        # 'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        # 'HOST': '127.0.0.1',
-        # 'PORT': '5432',
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -166,6 +166,7 @@ CORS_ALLOW_METHODS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://anytimefood.azurewebsites.net/"
 ]
 
 CORS_ALLOW_CREDENTIALS=True
